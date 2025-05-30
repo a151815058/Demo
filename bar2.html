@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>店鋪招租狀況</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    .circle-container {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      margin-bottom: 10px; /* ← 讓圓圈與表格之間更靠近 */
+    }
+    .circle-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      cursor: pointer;
+      background-color: white;
+      border: 5px solid;
+    }
+    .leasing {
+      border-color: #ff9800;
+      color: #ff9800;
+    }
+    .occupied {
+      border-color: #4caf50;
+      color: #4caf50;
+    }
+    .circle-label {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .section h3 {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .content-wrapper {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .info-section {
+      flex: 2;
+      min-width: 600px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .details {
+      overflow-x: auto;
+      width: 100%;
+    }
+    #chartContainer {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+    }
+
+    #chartdiv {
+      width: 100%;
+      height: 100%;
+      min-height: 300px;
+    }
+    .chart-header {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+</head>
+<body>
+
+  <h2 style="text-align:center">社宅店鋪招租狀況</h2>
+  <div class="content-wrapper">
+    <div class="info-section">
+      <div class="circle-container">
+        <div class="circle-wrapper">
+          <div class="circle-label" style="color:#ff9800">招租中</div>
+          <div class="circle leasing" onclick="showDetails('leasing')"><span id="leasingCount">0</span></div>
+        </div>
+        <div class="circle-wrapper">
+          <div class="circle-label" style="color:#4caf50">已入住</div>
+          <div class="circle occupied" onclick="showDetails('occupied')"><span id="occupiedCount">0</span></div>
+        </div>
+      </div>
+      <div class="details" id="detailsContainer"></div>
+    </div>
+
+    <div id="chartContainer">
+      <div class="chart-header" id="chartHeader"></div>
+      <div id="chartdiv"></div>
+    </div>
+  </div>
+
+  <script>
+    const stores = [
+      { name: "中路一號", shop: "店1", status: "leasing", type: "專案" },
+      { name: "中路一號", shop: "店2", status: "occupied", type: "公開", rentDue: 90000, rentPaid: 75000 },
+      { name: "中壢二號", shop: "店1", status: "occupied", type: "專案", rentDue: 60000, rentPaid: 55000 },
+      { name: "八德一號", shop: "店3", status: "leasing", type: "公開" },
+      { name: "八德二號", shop: "店2", status: "occupied", type: "公開", rentDue: 86000, rentPaid: 77000 },
+      { name: "平鎮一號", shop: "店1", status: "leasing", type: "專案" }
+    ];
+
+    document.getElementById('leasingCount').textContent = stores.filter(s => s.status === 'leasing').length;
+    document.getElementById('occupiedCount').textContent = stores.filter(s => s.status === 'occupied').length;
+
+    function showDetails(type) {
+      const filtered = stores.filter(s => s.status === type);
+      const container = document.getElementById("detailsContainer");
+      const title = type === 'leasing' ? '招租中店鋪' : '已入住店鋪';
+
+      const grouped = {};
+      filtered.forEach(s => {
+        if (!grouped[s.name]) {
+          grouped[s.name] = { 專案: 0, 公開: 0, shops: [] };
+        }
+        grouped[s.name][s.type]++;
+        grouped[s.name].shops.push(s);
+      });
+
+      let content = `
+        <div class="section">
+          <h3>${title}（共 ${filtered.length} 間）</h3>
+          <table>
+            <thead><tr><th>社宅名稱</th><th>專案</th><th>公開</th><th>總數</th></tr></thead>
+            <tbody>
+              ${Object.entries(grouped).map(([name, count]) => {
+                const total = count["專案"] + count["公開"];
+                const btn = type === 'occupied'
+                  ? `<td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','專案')">${count["專案"]}</span></td>
+                     <td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','公開')">${count["公開"]}</span></td>`
+                  : `<td>${count["專案"]}</td><td>${count["公開"]}</td>`;
+                return `<tr><td>${name}</td>${btn}<td>${total}</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = content;
+      document.getElementById("chartdiv").innerHTML = "";
+      document.getElementById("chartHeader").innerText = "";
+    }
+
+    function renderBarChartByFilter(name, type) {
+      const filtered = stores.filter(s => s.status === 'occupied' && s.name === name && s.type === type);
+      renderBarChart(filtered);
+    }
+
+    function renderBarChart(data) {
+      const chartData = data.map(s => {
+        const due = s.rentDue || 0;
+        const paid = s.rentPaid || 0;
+        return {
+          label: `${s.name}-${s.shop}`,
+          已收: paid,
+          未收: due - paid,
+          應收總額: due
+        };
+      });
+
+      const totalDue = chartData.reduce((sum, item) => sum + item.應收總額, 0);
+      const totalPaid = chartData.reduce((sum, item) => sum + item.已收, 0);
+      const totalUnpaid = chartData.reduce((sum, item) => sum + item.未收, 0);
+      document.getElementById("chartHeader").innerText = `應收金額: ${totalDue}  已收金額: ${totalPaid}  未收金額: ${totalUnpaid}`;
+
+      drawAmChart(chartData);
+    }
+
+    function drawAmChart(chartData) {
+      document.getElementById("chartdiv").innerHTML = "";
+      am5.ready(function () {
+        let root = am5.Root.new("chartdiv");
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        let chart = root.container.children.push(
+          am5xy.XYChart.new(root, {
+            layout: root.verticalLayout
+          })
+        );
+
+        let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+          categoryField: "label",
+          renderer: am5xy.AxisRendererY.new(root, {
+            minGridDistance: 30
+          })
+        }));
+
+        let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererX.new(root, {})
+        }));
+
+        ["已收", "未收"].forEach(category => {
+          let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            name: category,
+            stacked: true,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueXField: category,
+            categoryYField: "label",
+            tooltip: am5.Tooltip.new(root, {
+              labelText: "{categoryY}\n{name}: {valueX}\n應收: {應收總額}"
+            })
+          }));
+          series.data.setAll(chartData);
+        });
+
+        yAxis.data.setAll(chartData);
+        chart.appear(1000, 100);
+      });
+    }
+  </script>
+
+</body>
+</html>

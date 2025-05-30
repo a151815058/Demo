@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>複合圖表（管理費 + 租金）</title>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    #info {
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    #info h3 {
+      text-align: center;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      margin-top: 10px;
+    }
+    .info-box {
+      background: #fff;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    #chartdiv {
+      width: 100%;
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h3>114年5月應收報表</h3>
+  </div>
+  <div id="chartdiv"></div>
+
+  <script>
+    am5.ready(function () {
+      let root = am5.Root.new("chartdiv");
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      let chart = root.container.children.push(
+        am5xy.XYChart.new(root, {
+          panX: false,
+          panY: false,
+          wheelX: "none",
+          wheelY: "none"
+        })
+      );
+
+      let data = [
+        { name: "中路一號", fee: 120000, rent_due: 350000, rent_paid: 300000 },
+        { name: "中路二號", fee: 98000, rent_due: 310000, rent_paid: 290000 },
+        { name: "中路三號", fee: 75000, rent_due: 280000, rent_paid: 270000 },
+        { name: "中路四號", fee: 135000, rent_due: 400000, rent_paid: 350000 },
+        { name: "蘆竹一號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "蘆竹二號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "八德一號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "八德二號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "中壢一號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "中壢二號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "平鎮一號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "楊梅一號", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "東門段(都更)", fee: 50000, rent_due: 150000, rent_paid: 145000 },
+		{ name: "中興巷(都更)", fee: 50000, rent_due: 150000, rent_paid: 145000 }
+      ];
+
+      const infoDiv = document.getElementById("info");
+
+      let xAxis = chart.xAxes.push(
+        am5xy.CategoryAxis.new(root, {
+          categoryField: "name",
+          renderer: am5xy.AxisRendererX.new(root, {
+            minGridDistance: 30
+          }),
+          tooltip: am5.Tooltip.new(root, {})
+        })
+      );
+      xAxis.data.setAll(data);
+
+      let yAxisLeft = chart.yAxes.push(
+        am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererY.new(root, {}),
+          tooltip: am5.Tooltip.new(root, {})
+        })
+      );
+
+      let yAxisRight = chart.yAxes.push(
+        am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererY.new(root, { opposite: true }),
+          tooltip: am5.Tooltip.new(root, {})
+        })
+      );
+
+      let feeSeries = chart.series.push(
+        am5xy.ColumnSeries.new(root, {
+          name: "應收管理費",
+          xAxis: xAxis,
+          yAxis: yAxisLeft,
+          valueYField: "fee",
+          categoryXField: "name",
+          stacked: true,
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{name} 管理費: {valueY} 元"
+          })
+        })
+      );
+      feeSeries.columns.template.setAll({ fill: am5.color(0x3366cc), stroke: am5.color(0x3366cc) });
+      feeSeries.data.setAll(data);
+
+      let rentSeries = chart.series.push(
+        am5xy.ColumnSeries.new(root, {
+          name: "應收租金",
+          xAxis: xAxis,
+          yAxis: yAxisLeft,
+          valueYField: "rent_due",
+          categoryXField: "name",
+          stacked: true,
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{name} 租金: {valueY} 元"
+          })
+        })
+      );
+      rentSeries.columns.template.setAll({ fill: am5.color(0x99cc00), stroke: am5.color(0x99cc00) });
+      rentSeries.data.setAll(data);
+
+      let rentPaidSeries = chart.series.push(
+        am5xy.LineSeries.new(root, {
+          name: "已收租金",
+          xAxis: xAxis,
+          yAxis: yAxisRight,
+          valueYField: "rent_paid",
+          categoryXField: "name",
+          stroke: am5.color(0xFF6600),
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{name} 已收: {valueY} 元"
+          })
+        })
+      );
+      rentPaidSeries.strokes.template.setAll({ strokeWidth: 2 });
+      rentPaidSeries.data.setAll(data);
+
+      rentPaidSeries.bullets.push(function () {
+        return am5.Bullet.new(root, {
+          sprite: am5.Circle.new(root, {
+            radius: 4,
+            fill: root.interfaceColors.get("background"),
+            stroke: rentPaidSeries.get("stroke"),
+            strokeWidth: 2
+          })
+        });
+      });
+
+      [feeSeries, rentSeries].forEach(series => {
+        series.columns.template.events.on("click", function (ev) {
+          const category = ev.target.dataItem.dataContext.name;
+          const item = data.find(d => d.name === category);
+          if (item) {
+            const rate = ((item.rent_paid / item.rent_due) * 100).toFixed(1);
+            const diff = item.rent_due - item.rent_paid;
+            infoDiv.innerHTML = `
+              <h3>${item.name} 租金繳交資訊</h3>
+              <div class="info-grid">
+                <div class="info-box">應收總金額：${item.rent_due.toLocaleString()} 元</div>
+                <div class="info-box">已繳租金金額：${item.rent_paid.toLocaleString()} 元</div>
+                <div class="info-box">租金繳交率：${rate}%</div>
+                <div class="info-box">剩餘分期金額：${diff.toLocaleString()} 元</div>
+              </div>
+            `;
+          }
+        });
+      });
+
+      chart.set("cursor", am5xy.XYCursor.new(root, {
+        behavior: "zoomX"
+      }));
+
+      chart.appear(1000, 100);
+      feeSeries.appear();
+      rentSeries.appear();
+      rentPaidSeries.appear();
+    });
+  </script>
+</body>
+</html>

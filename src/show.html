@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>社宅住戶統計圖表</title>
+
+  <!-- amCharts Styles -->
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    #container {
+      display: flex;
+      gap: 20px;
+    }
+    #tableContainer {
+      width: 50%;
+      overflow-x: auto;
+    }
+    #chartdiv {
+      width: 50%;
+      height: 600px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    a {
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+  </style>
+
+  <!-- amCharts Resources -->
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+</head>
+<body>
+
+<h2>統計日期：截至114年4月2日</h2>
+
+<div id="container">
+  <!-- 表格區塊 -->
+  <div id="tableContainer">
+    <table>
+      <thead>
+        <tr>
+          <th>社宅</th>
+          <th>總戶數</th>
+          <th>一般戶</th>
+          <th>一般戶具政策資格</th>
+          <th>警消戶</th>
+          <th>政策戶</th>
+          <th>安置戶</th>
+          <th>拆遷戶/中繼戶</th>
+          <th>高齡友善換居</th>
+          <th>專案戶</th>
+        </tr>
+      </thead>
+      <tbody id="housingTable">
+        <tr data-name="中路一號" data-values='[{"category":"一般戶", "value":75},{"category":"警消戶", "value":4},{"category":"政策戶", "value":72},{"category":"拆遷戶", "value":15},{"category":"專案戶", "value":6}]'>
+          <td><a onclick="updateChart(this)">中路一號</a></td><td>166/169</td><td>75</td><td>0</td><td>4</td><td>72</td><td>0</td><td>15</td><td>0</td><td>6</td>
+        </tr>
+        <tr data-name="中路二號" data-values='[{"category":"一般戶", "value":104},{"category":"警消戶", "value":0},{"category":"政策戶", "value":104},{"category":"高齡友善換居", "value":1}]'>
+          <td><a onclick="updateChart(this)">中路二號</a></td><td>210/212</td><td>104</td><td>1</td><td>0</td><td>104</td><td>0</td><td>0</td><td>1</td><td>0</td>
+        </tr>
+        <tr data-name="中路三號" data-values='[{"category":"一般戶", "value":212},{"category":"警消戶", "value":4},{"category":"政策戶", "value":187},{"category":"安置戶", "value":3},{"category":"高齡友善換居", "value":1}]'>
+          <td><a onclick="updateChart(this)">中路三號</a></td><td>413/417</td><td>212</td><td>6</td><td>4</td><td>187</td><td>3</td><td>0</td><td>1</td><td>0</td>
+        </tr>
+        <tr data-name="中路四號" data-values='[{"category":"一般戶", "value":166},{"category":"警消戶", "value":2},{"category":"政策戶", "value":144},{"category":"高齡友善換居", "value":3},{"category":"專案戶", "value":26}]'>
+          <td><a onclick="updateChart(this)">中路四號</a></td><td>343/350</td><td>166</td><td>2</td><td>2</td><td>144</td><td>0</td><td>0</td><td>3</td><td>26</td>
+        </tr>
+        <tr data-name="蘆竹一號" data-values='[{"category":"一般戶", "value":60},{"category":"政策戶", "value":51},{"category":"專案戶", "value":2}]'>
+          <td><a onclick="updateChart(this)">蘆竹一號</a></td><td>114/114</td><td>60</td><td>1</td><td>0</td><td>51</td><td>0</td><td>0</td><td>0</td><td>2</td>
+        </tr>
+        <tr data-name="蘆竹二號" data-values='[{"category":"一般戶", "value":178},{"category":"警消戶", "value":5},{"category":"政策戶", "value":115},{"category":"拆遷戶", "value":94}]'>
+          <td><a onclick="updateChart(this)">蘆竹二號</a></td><td>406/416</td><td>178</td><td>14</td><td>5</td><td>115</td><td>0</td><td>94</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-name="八德一號" data-values='[{"category":"一般戶", "value":196},{"category":"警消戶", "value":5},{"category":"政策戶", "value":209},{"category":"安置戶", "value":1}]'>
+          <td><a onclick="updateChart(this)">八德一號</a></td><td>406/418</td><td>196</td><td>1</td><td>5</td><td>209</td><td>1</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-name="八德二號" data-values='[{"category":"一般戶", "value":156},{"category":"警消戶", "value":4},{"category":"政策戶", "value":172},{"category":"專案戶", "value":2}]'>
+          <td><a onclick="updateChart(this)">八德二號</a></td><td>335/354</td><td>156</td><td>1</td><td>4</td><td>172</td><td>0</td><td>0</td><td>0</td><td>2</td>
+        </tr>
+        <tr data-name="中壢一號" data-values='[{"category":"一般戶", "value":272},{"category":"警消戶", "value":8},{"category":"政策戶", "value":228},{"category":"安置戶", "value":2},{"category":"高齡友善換居", "value":2}]'>
+          <td><a onclick="updateChart(this)">中壢一號</a></td><td>520/524</td><td>272</td><td>8</td><td>8</td><td>228</td><td>2</td><td>0</td><td>2</td><td>0</td>
+        </tr>
+        <tr data-name="中壢二號" data-values='[{"category":"一般戶", "value":489},{"category":"警消戶", "value":2},{"category":"政策戶", "value":428},{"category":"高齡友善換居", "value":2}]'>
+          <td><a onclick="updateChart(this)">中壢二號</a></td><td>933/957</td><td>489</td><td>12</td><td>2</td><td>428</td><td>0</td><td>0</td><td>2</td><td>0</td>
+        </tr>
+        <tr data-name="平鎮一號" data-values='[{"category":"一般戶", "value":31},{"category":"警消戶", "value":1},{"category":"政策戶", "value":28},{"category":"專案戶", "value":2}]'>
+          <td><a onclick="updateChart(this)">平鎮一號</a></td><td>64/64</td><td>31</td><td>2</td><td>1</td><td>28</td><td>0</td><td>0</td><td>0</td><td>2</td>
+        </tr>
+        <tr data-name="楊梅一號" data-values='[{"category":"一般戶", "value":115},{"category":"警消戶", "value":2},{"category":"政策戶", "value":90},{"category":"高齡友善換居", "value":2}]'>
+          <td><a onclick="updateChart(this)">楊梅一號</a></td><td>215/216</td><td>115</td><td>6</td><td>2</td><td>90</td><td>0</td><td>0</td><td>2</td><td>0</td>
+        </tr>
+        <tr data-name="東門段(都更)" data-values='[{"category":"一般戶", "value":23},{"category":"政策戶", "value":45}]'>
+          <td><a onclick="updateChart(this)">東門段(都更)</a></td><td>69/70</td><td>23</td><td>1</td><td>0</td><td>45</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-name="中興巷(都更)" data-values='[{"category":"一般戶", "value":31},{"category":"政策戶", "value":52}]'>
+          <td><a onclick="updateChart(this)">中興巷(都更)</a></td><td>89/93</td><td>31</td><td>0</td><td>0</td><td>52</td><td>0</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 圖表區 -->
+  <div id="chartdiv"></div>
+</div>
+
+<!-- amCharts 初始化 -->
+<script>
+let root = am5.Root.new("chartdiv");
+root.setThemes([am5themes_Animated.new(root)]);
+
+let chart = root.container.children.push(
+  am5percent.PieChart.new(root, { endAngle: 270 })
+);
+
+let series = chart.series.push(
+  am5percent.PieSeries.new(root, {
+    valueField: "value",
+    categoryField: "category",
+    endAngle: 270
+  })
+);
+
+series.states.create("hidden", { endAngle: -90 });
+
+series.data.setAll([{ category: "請點選左側社宅名稱", value: 1 }]);
+
+function updateChart(el) {
+  const tr = el.closest("tr");
+  const name = tr.getAttribute("data-name");
+  const values = JSON.parse(tr.getAttribute("data-values"));
+
+  chart.set("title", am5.Label.new(root, {
+    text: name + " 住戶分布",
+    fontSize: 22,
+    centerX: am5.percent(50),
+    x: am5.percent(50),
+    marginBottom: 15
+  }));
+
+  series.data.setAll(values);
+}
+</script>
+
+</body>
+</html>

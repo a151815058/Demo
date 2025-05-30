@@ -1,0 +1,27 @@
+/* Menu hamburger toggle */ 
+.menu-hamburger-toggle{
+    .btn-icon{        
+        --btn-icon-size: 50px;
+        //--
+        transition: all 0.2s;    
+        &:hover {
+            background-color: rgba(black, 0.2);
+        }
+
+        // 狀態
+        .is-open{
+            display: none;
+        }
+        .is-close{
+            display: inline-block;
+        }
+        &[aria-expanded="true"]{
+            .is-open{
+                display: inline-block;
+            }
+            .is-close{
+                display: none;
+            }
+        }
+    }
+}

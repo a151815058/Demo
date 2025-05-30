@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>店鋪招租狀況</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 30px;
+    }
+    .circle-container {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      margin-bottom: 30px;
+    }
+    .circle-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      cursor: pointer;
+      background-color: white;
+      border: 5px solid;
+    }
+    .leasing {
+      border-color: #ff9800;
+      color: #ff9800;
+    }
+    .occupied {
+      border-color: #4caf50;
+      color: #4caf50;
+    }
+    .circle-label {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .details {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .section h3 {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>社宅店鋪招租狀況</h2>
+  <div class="circle-container">
+    <div class="circle-wrapper">
+      <div class="circle-label" style="color:#ff9800">招租中</div>
+      <div class="circle leasing" onclick="showDetails('leasing')"><span id="leasingCount">0</span></div>
+    </div>
+    <div class="circle-wrapper">
+      <div class="circle-label" style="color:#4caf50">已入住</div>
+      <div class="circle occupied" onclick="showDetails('occupied')"><span id="occupiedCount">0</span></div>
+    </div>
+  </div>
+
+  <div class="details" id="detailsContainer"></div>
+  <iframe id="chartFrame" src="bar2.html"></iframe>
+
+  <script>
+    const stores = [
+      { name: "中路一號", shop: "店1", status: "leasing", type: "專案" },
+      { name: "中路一號", shop: "店2", status: "occupied", type: "公開", rentDue: 100000, rentPaid: 80000 },
+      { name: "中壢二號", shop: "店1", status: "occupied", type: "專案", rentDue: 150000, rentPaid: 120000 },
+      { name: "八德一號", shop: "店3", status: "leasing", type: "公開" },
+      { name: "八德二號", shop: "店2", status: "occupied", type: "公開", rentDue: 130000, rentPaid: 100000 },
+      { name: "平鎮一號", shop: "店1", status: "leasing", type: "專案" },
+    ];
+
+    document.getElementById('leasingCount').textContent = stores.filter(s => s.status === 'leasing').length;
+    document.getElementById('occupiedCount').textContent = stores.filter(s => s.status === 'occupied').length;
+
+    function showDetails(type) {
+      const filtered = stores.filter(s => s.status === type);
+      const container = document.getElementById("detailsContainer");
+      const title = type === 'leasing' ? '招租中店鋪' : '已入住店鋪';
+
+      const grouped = {};
+      filtered.forEach(s => {
+        if (!grouped[s.name]) {
+          grouped[s.name] = { 專案: 0, 公開: 0, shops: [] };
+        }
+        grouped[s.name][s.type]++;
+        grouped[s.name].shops.push(s);
+      });
+
+      let content = `
+        <div class="section">
+          <h3>${title}（共 ${filtered.length} 間）</h3>
+          <table>
+            <thead><tr><th>社宅名稱</th><th>專案</th><th>公開</th><th>總數</th></tr></thead>
+            <tbody>
+              ${Object.entries(grouped).map(([name, count]) => {
+                const total = count["專案"] + count["公開"];
+                return `<tr><td>${name}</td><td>${count["專案"]}</td><td>${count["公開"]}</td><td>${total}</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = content;
+
+      if (type === 'occupied') {
+        const frame = document.getElementById("chartFrame");
+        frame.contentWindow.postMessage(filtered, "*");
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+/* .table-bordered table左右無框線 */
+.table-bordered>:not(caption)>*>* {
+    border-left-width: 0;
+    &:last-child{
+        border-right-width: 0;
+    }
+}
+/* .table-bordered th上方無框線 */
+.table-bordered>thead>tr:first-child{
+    border-top-width: 0;
+}

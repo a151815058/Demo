@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>社宅圖表</title>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #eee;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      margin: 0 2px;
+    }
+
+    .tab.active {
+      background: #fff;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    #chartdiv {
+      width: 100%;
+      max-width: 650px;
+      height: 400px;
+      margin: 0 auto;
+    }
+
+    .info-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #444;
+    }
+
+    .info-wrapper > div {
+      display: none;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 500px;
+      margin-bottom: 20px;
+    }
+
+    .details-box {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頁籤選單 -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('tab1')">住戶分布</div>
+    <div class="tab" onclick="switchTab('tab2')">社宅修繕狀況</div>
+    <div class="tab" onclick="switchTab('tab3')">社宅招租情況</div>
+  </div>
+
+  <!-- 住戶分布 -->
+  <div id="tab1" class="tab-content active">
+    <div id="chartdiv"></div>
+    <div class="info-wrapper">
+      <div id="rentRate">出租率：--%</div>
+      <div id="aboriginalRate">原住民比例：--%</div>
+    </div>
+  </div>
+
+  <!-- 社宅修繕狀況 -->
+  <div id="tab2" class="tab-content">
+    <h3 id="repairTitle">社宅修繕狀況</h3>
+    <div id="repairCombinedChart" class="chart-box"></div>
+    <div id="repairDetailInfo" class="details-box"></div>
+  </div>
+
+  <!-- 社宅招租情況狀況 -->
+  <div id="tab3" class="tab-content">
+    <h3>社宅招租情況</h3>
+    <p>請於此區顯示招租情況，例如隨到隨辦、續租、退租等。</p>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      const tabs = document.querySelectorAll('.tab');
+      const contents = document.querySelectorAll('.tab-content');
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    const repairRawData = {
+      "中路一號": { repairs: { 漏水: 3, 電力: 2, 地板: 1 }, avgDays: { 漏水: 5, 電力: 3, 地板: 2 } },
+      "八德一號": { repairs: { 漏水: 2, 電力: 3, 地板: 0 }, avgDays: { 漏水: 6, 電力: 4, 地板: 2 } },
+      "中壢一號": { repairs: { 漏水: 1, 電力: 1, 地板: 2 }, avgDays: { 漏水: 4, 電力: 2, 地板: 3 } }
+    };
+
+    function renderRepairChart(name) {
+      am5.array.each(am5.registry.rootElements, function (root) {
+        if (root.dom.id === "repairCombinedChart") {
+          root.dispose();
+        }
+      });
+
+      let root = am5.Root.new("repairCombinedChart");
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        layout: root.verticalLayout
+      }));
+
+      const data = repairRawData[name];
+      if (!data) return;
+
+      const lineData = Object.keys(data.repairs).map(type => ({
+        category: type,
+        count: data.repairs[type],
+        days: data.avgDays[type]
+      }));
+
+      let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "category",
+        renderer: am5xy.AxisRendererX.new(root, {})
+      }));
+      xAxis.data.setAll(lineData);
+
+      let yAxisLeft = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {})
+      }));
+
+      let yAxisRight = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, { opposite: true })
+      }));
+
+      let lineSeries = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "修繕次數",
+        xAxis: xAxis,
+        yAxis: yAxisLeft,
+        valueYField: "count",
+        categoryXField: "category",
+        tooltip: am5.Tooltip.new(root, { labelText: "{categoryX}\n次數: {valueY} 次" })
+      }));
+      lineSeries.data.setAll(lineData);
+
+      let barSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "平均耗時(天)",
+        xAxis: xAxis,
+        yAxis: yAxisRight,
+        valueYField: "days",
+        categoryXField: "category",
+        tooltip: am5.Tooltip.new(root, { labelText: "{categoryX}\n耗時: {valueY} 天" })
+      }));
+      barSeries.data.setAll(lineData);
+
+      const detailBox = document.getElementById("repairDetailInfo");
+
+      [lineSeries, barSeries].forEach(series => {
+        series.columns && series.columns.template.events.on("click", function (ev) {
+          const category = ev.target.dataItem.dataContext.category;
+          const detail = `🔧 類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
+          detailBox.textContent = detail;
+        });
+        series.strokes && series.strokes.template.events.on("click", function (ev) {
+          const category = ev.target.dataItem.dataContext.category;
+          const detail = `🔧 類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
+          detailBox.textContent = detail;
+        });
+      });
+    }
+  </script>
+
+  <script>
+    let root = am5.Root.new("chartdiv");
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    let chart = root.container.children.push(
+      am5percent.PieChart.new(root, {
+        endAngle: 270,
+        layout: root.verticalLayout,
+        paddingRight: 80,
+        paddingLeft: 80
+      })
+    );
+
+    let series = chart.series.push(
+      am5percent.PieSeries.new(root, {
+        valueField: "value",
+        categoryField: "category",
+        endAngle: 270
+      })
+    );
+
+    series.data.setAll([{ category: "請點選社宅", value: 1 }]);
+
+    const titleLabel = am5.Label.new(root, {
+      text: "請點選社宅名稱",
+      fontSize: 20,
+      centerX: am5.percent(50),
+      x: am5.percent(50),
+      marginBottom: 15
+    });
+    chart.children.unshift(titleLabel);
+
+    window.addEventListener("message", (event) => {
+      const { name, values } = event.data;
+      titleLabel.set("text", name + " 住戶分布");
+
+      const rentRateElement = document.getElementById("rentRate");
+      const aboriginalRateElement = document.getElementById("aboriginalRate");
+      rentRateElement.style.display = "none";
+      aboriginalRateElement.style.display = "none";
+
+      const total = values.reduce((sum, item) => sum + item.value, 0);
+      const rentedValue = values.filter(item => item.category === "政策戶" || item.category === "一般戶")
+                                 .reduce((sum, item) => sum + item.value, 0);
+
+      if (total > 0 && rentedValue > 0) {
+        const rate = ((rentedValue / total) * 100).toFixed(1);
+        rentRateElement.textContent = `出租率：${rate}%`;
+        rentRateElement.style.display = "block";
+      }
+
+      const policyItem = values.find(item => item.category === "政策戶");
+      if (policyItem) {
+        const aboriginalCount = Math.round(policyItem.value * 0.2);
+        const rate = ((aboriginalCount / policyItem.value) * 100).toFixed(1);
+        aboriginalRateElement.textContent = `原住民比例：${rate}%`;
+        aboriginalRateElement.style.display = "block";
+      }
+
+      series.data.setAll(values);
+
+      renderRepairChart(name);
+      document.getElementById("repairTitle").innerText = name + " 修繕狀況";
+    });
+  </script>
+</body>
+</html>
