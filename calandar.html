@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>社宅行事曆</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f6f6f6;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    select {
+      padding: 6px 12px;
+      font-size: 16px;
+    }
+
+    .legend {
+      margin: 10px 0;
+    }
+
+    .legend span {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+    }
+
+    .fc .fc-toolbar-title {
+      font-size: 22px;
+    }
+
+    .fc-daygrid-event {
+      font-size: 12px;
+    }
+
+    #calendar {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>社宅行事曆</h2>
+
+  <div class="calendar-header">
+    <select id="projectSelector">
+      <option>中路一號</option>
+      <option>中路二號</option>
+      <option>中路三號</option>
+      <option>中路四號</option>
+    </select>
+  </div>
+
+  <div class="legend">
+    <span style="background-color: #f9c5c5;">申請/審核/抽籤</span>
+    <span style="background-color: #e57373;">選屋</span>
+    <span style="background-color: #f4bb77;">點交/點退</span>
+    <span style="background-color: #a67c52;">場地</span>
+    <span style="background-color: #3134d1;">生活學校</span>
+    <span style="background-color: #30fdb5;">培訓課程</span>
+    <span style="background-color: #8bc34a;">定期維養</span>
+    <span style="background-color: #4caf50;">報修</span>
+    <span style="background-color: #d9d9d9; color: #000;">國定假日</span>
+  </div>
+
+  <div id="calendar"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new window.FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'zh-tw',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek,dayGridDay'
+        },
+        events: [
+          {
+            title: '中山醫5月大型活動',
+            start: '2025-05-27',
+            end: '2025-06-03',
+            color: '#4a90e2'
+          },
+          {
+            title: '繳租選屋',
+            start: '2025-05-29',
+            color: '#e57373'
+          },
+          {
+            title: '點退件數：2',
+            start: '2025-06-01',
+            color: '#f4bb77'
+          },
+          {
+            title: '第748次點交簽約',
+            start: '2025-06-08',
+            color: '#f4bb77'
+          },
+          {
+            title: '國定假日',
+            start: '2025-06-10',
+            color: '#d9d9d9'
+          }
+        ]
+      });
+
+      calendar.render();
+    });
+  </script>
+
+</body>
+</html>

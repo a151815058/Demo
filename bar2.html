@@ -12,7 +12,7 @@
       display: flex;
       justify-content: center;
       gap: 80px;
-      margin-bottom: 10px; /* ← 讓圓圈與表格之間更靠近 */
+      margin-bottom: 10px;
     }
     .circle-wrapper {
       display: flex;
@@ -87,7 +87,6 @@
       align-items: center;
       height: 100%;
     }
-
     #chartdiv {
       width: 100%;
       height: 100%;
@@ -99,15 +98,44 @@
       margin-bottom: 10px;
       text-align: center;
     }
+    .tab-header {
+      display: flex;
+      border-bottom: 2px solid #ccc;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .tab-button {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #f9f9f9;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-weight: bold;
+    }
+    .tab-button.active {
+      border-bottom: 2px solid #3f51b5;
+      background-color: #fff;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
   </style>
+
+  <!-- amCharts scripts -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
 </head>
 <body>
 
   <h2 style="text-align:center">社宅店鋪招租狀況</h2>
+
   <div class="content-wrapper">
+    <!-- 左側：圓圈與詳細表 -->
     <div class="info-section">
       <div class="circle-container">
         <div class="circle-wrapper">
@@ -122,12 +150,29 @@
       <div class="details" id="detailsContainer"></div>
     </div>
 
+    <!-- 右側：頁籤 + 圖表 -->
     <div id="chartContainer">
-      <div class="chart-header" id="chartHeader"></div>
-      <div id="chartdiv"></div>
+      <div class="tab-header">
+        <button class="tab-button active" onclick="switchTab('business')">店舖營運狀況</button>
+        <button class="tab-button" onclick="switchTab('occupancy')">店鋪進駐比例</button>
+      </div>
+
+      <!-- 營運圖表 -->
+      <div class="tab-content active" id="businessTab">
+        <div class="chart-header" id="chartHeader"></div>
+        <div id="chartdiv"></div>
+      </div>
+
+      <!-- 圓餅圖 -->
+      <div class="tab-content" id="occupancyTab">
+        <div class="chart-header">進駐類別比例</div>
+        <div id="occupancyChart" style="width: 100%; max-width: 1000px; height: 600px; margin-top: -250px; margin-bottom: 60px;"></div>
+        <div id="noDataMessage" style="text-align:center; color: gray; font-style: italic; display: none;">目前尚無資料</div>
+      </div>
     </div>
   </div>
 
+  <!-- JavaScript -->
   <script>
     const stores = [
       { name: "中路一號", shop: "店1", status: "leasing", type: "專案" },
@@ -159,15 +204,16 @@
         <div class="section">
           <h3>${title}（共 ${filtered.length} 間）</h3>
           <table>
-            <thead><tr><th>社宅名稱</th><th>專案</th><th>公開</th><th>總數</th></tr></thead>
+            <thead><tr><th>社宅名稱</th><th>總戶數</th><th>專案</th><th>公開</th><th>已進駐</th></tr></thead>
             <tbody>
               ${Object.entries(grouped).map(([name, count]) => {
                 const total = count["專案"] + count["公開"];
+                const totalUnits = Math.floor(Math.random() * 3) + total + 1;
                 const btn = type === 'occupied'
                   ? `<td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','專案')">${count["專案"]}</span></td>
                      <td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','公開')">${count["公開"]}</span></td>`
                   : `<td>${count["專案"]}</td><td>${count["公開"]}</td>`;
-                return `<tr><td>${name}</td>${btn}<td>${total}</td></tr>`;
+                return `<tr><td>${name}</td><td>${totalUnits}</td>${btn}<td>${total}</td></tr>`;
               }).join('')}
             </tbody>
           </table>
@@ -212,15 +258,17 @@
 
         let chart = root.container.children.push(
           am5xy.XYChart.new(root, {
-            layout: root.verticalLayout
+            layout: root.verticalLayout,
+            innerRadius: am5.percent(30), // 甜甜圈效果
+            radius: am5.percent(100),
+            width: am5.percent(100),
+            height: am5.percent(100)
           })
         );
 
         let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
           categoryField: "label",
-          renderer: am5xy.AxisRendererY.new(root, {
-            minGridDistance: 30
-          })
+          renderer: am5xy.AxisRendererY.new(root, { minGridDistance: 30 })
         }));
 
         let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
@@ -245,6 +293,53 @@
         yAxis.data.setAll(chartData);
         chart.appear(1000, 100);
       });
+    }
+
+    // 圓餅圖初始化
+    am5.ready(function () {
+      var root = am5.Root.new("occupancyChart");
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      var chart = root.container.children.push(am5percent.PieChart.new(root, {
+        layout: root.verticalLayout
+      }));
+
+      var series = chart.series.push(am5percent.PieSeries.new(root, {
+        valueField: "value",
+        categoryField: "category",
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{category}: {value}%"
+        })
+      }));
+
+      var chartData = [
+        { category: "公共集會類", value: 10 },
+        { category: "商業類", value: 30 },
+        { category: "衛生／福利／更生類", value: 50 },
+        { category: "工業／倉儲類", value: 10 }
+      ];
+
+      if (chartData.length === 0) {
+        document.getElementById("noDataMessage").style.display = "block";
+      } else {
+        document.getElementById("noDataMessage").style.display = "none";
+        series.data.setAll(chartData);
+      }
+
+      series.slices.template.events.on("click", function (ev) {
+        var category = ev.target.dataItem?.dataContext?.category;
+        if (category) {
+          alert("點選類別：" + category);
+        }
+      });
+    });
+
+    // 頁籤切換
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.tab-button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(tabId + 'Tab').classList.add('active');
     }
   </script>
 
