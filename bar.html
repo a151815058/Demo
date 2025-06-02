@@ -15,9 +15,16 @@
     #info {
       padding: 20px;
       background-color: #f8f8f8;
+      position: relative; /* 新增 */
+    }
+    #title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
     }
     #info h3 {
-      text-align: center;
+      margin: 0;
     }
     .info-grid {
       display: grid;
@@ -35,11 +42,27 @@
       width: 100%;
       height: 600px;
     }
+    .header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    select {
+      font-size: 16px;
+      padding: 4px 8px;
+    }
   </style>
 </head>
 <body>
   <div id="info">
-    <h3>114年5月應收報表</h3>
+    <div class="header-flex">
+      <h3 id="title">114年5月各社宅應收報表</h3>
+      <select id="monthSelect" onchange="changeMonth(this.value)">
+        <option value="114-05" selected>114年5月</option>
+        <option value="114-04">114年4月</option>
+        <option value="114-03">114年3月</option>
+      </select>
+    </div>
   </div>
   <div id="chartdiv"></div>
 
@@ -48,106 +71,122 @@
       let root = am5.Root.new("chartdiv");
       root.setThemes([am5themes_Animated.new(root)]);
 
-      let chart = root.container.children.push(
-        am5xy.XYChart.new(root, {
-          panX: false,
-          panY: false,
-          wheelX: "none",
-          wheelY: "none"
-        })
-      );
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "none",
+        wheelY: "none"
+      }));
 
-      let data = [
-        { name: "中路一號", fee: 1275074, rent_due: 961078, rent_paid: 313996 },
-        { name: "中路二號", fee: 2075345, rent_due: 1648005, rent_paid: 427340 },
-        { name: "中路三號", fee: 3784571, rent_due: 2975127, rent_paid: 809444 },
-        { name: "中路四號", fee: 3515619, rent_due: 2801730, rent_paid: 713889 },
-        { name: "蘆竹一號", fee: 851100, rent_due: 625100, rent_paid: 226000 },
-        { name: "蘆竹二號", fee: 3335610, rent_due: 2701383, rent_paid: 634227 },
-        { name: "八德一號", fee: 3304958, rent_due: 2382200, rent_paid: 922758 },
-        { name: "八德二號", fee: 1943847, rent_due: 1352821, rent_paid: 591026 },
-        { name: "中壢一號", fee: 3676345, rent_due: 2645839, rent_paid: 1030506 },
-        { name: "中壢二號", fee: 8796379, rent_due: 6560147, rent_paid: 2236232 },
-        { name: "平鎮一號", fee: 627500, rent_due: 440813, rent_paid: 562240 },
-        { name: "楊梅一號", fee: 1818962, rent_due: 1256722, rent_paid: 145000 },
-        { name: "東門段(都更)", fee: 735318, rent_due: 557718, rent_paid: 177600 },
-        { name: "中興巷(都更)", fee: 990355, rent_due: 727315, rent_paid: 263040 }
-      ];
+      let dataset = {
+        "114-05": [
+          { name: "中路一號", fee: 961078, rent_due: 313996, rent_paid: 1249049 ,installment : 0},
+          { name: "中路二號", fee: 1648005, rent_due: 427340, rent_paid: 1962645,installment : 0 },
+          { name: "中路三號", fee: 2975127, rent_due: 809444, rent_paid: 3642464 ,installment : 0},
+          { name: "中路四號", fee: 2801730, rent_due:713889 , rent_paid: 3372303 ,installment : 0},
+          { name: "蘆竹一號", fee: 625100, rent_due:226000 , rent_paid:827300 ,installment : 0 },
+          { name: "蘆竹二號", fee: 2701383, rent_due:634227 , rent_paid: 3319410,installment : 0 },
+          { name: "八德一號", fee: 2382200, rent_due:922758 , rent_paid: 3174056 ,installment : 0},
+          { name: "八德二號", fee: 1352821, rent_due:591026, rent_paid: 1881199 ,installment : 0},
+          { name: "中壢一號", fee: 2645839, rent_due:1030506, rent_paid:3553645,installment : 0  },
+          { name: "中壢二號", fee: 6560147, rent_due:2236232 , rent_paid: 8420179,installment : 0},
+          { name: "平鎮一號", fee: 440813, rent_due:562240 , rent_paid: 603400,installment : 4600},
+          { name: "楊梅一號", fee: 1256722, rent_due:145000 , rent_paid: 1764326 ,installment : 0},
+          { name: "東門段(都更)", fee: 557718, rent_due:177600 , rent_paid: 717707,installment : 0 },
+          { name: "中興巷(都更)", fee: 727315, rent_due:263040, rent_paid: 990355,installment : 0 }
+        ],
+        "114-04": [
+          { name: "中路一號", fee: 951296, rent_due: 310293, rent_paid: 1242564 ,installment : 0},
+          { name: "中路二號", fee: 1658235, rent_due: 428999, rent_paid: 1956900,installment : 0 },
+          { name: "中路三號", fee: 2959148, rent_due: 806332, rent_paid: 3630180,installment : 16700},
+          { name: "中路四號", fee: 2805159, rent_due: 713534, rent_paid: 3460620,installment : 0},
+          { name: "蘆竹一號", fee: 629900, rent_due: 228800, rent_paid: 843500,installment : 0 },
+          { name: "蘆竹二號", fee: 2688533, rent_due: 629867, rent_paid: 3296400,installment : 0 },
+          { name: "八德一號", fee: 2378455, rent_due: 925268, rent_paid:  3204487,installment : 0},
+          { name: "八德二號", fee: 1368027, rent_due:595501, rent_paid: 1920558,installment : 0},
+          { name: "中壢一號", fee: 2662688, rent_due:1034445, rent_paid:3529520,installment : 6800  },
+          { name: "中壢二號", fee: 6490987, rent_due: 2210452, rent_paid: 8401012,installment : 0},
+          { name: "平鎮一號", fee: 453133, rent_due: 192767, rent_paid: 627500,installment : 18400},
+          { name: "楊梅一號", fee: 1099860, rent_due: 499440, rent_paid:  1549500,installment : 0},
+          { name: "東門段(都更)", fee: 552166, rent_due:175200 , rent_paid: 716602,installment : 0 },
+          { name: "中興巷(都更)", fee: 727315, rent_due:263040, rent_paid: 990355,installment : 0 }
+        ],
+        "114-03": [
+        { name: "中路一號", fee: 961078, rent_due: 313996, rent_paid: 1249049 ,installment : 0},
+        { name: "中路二號", fee: 1648005, rent_due: 427340, rent_paid: 1962645,installment : 0 },
+        { name: "中路三號", fee: 2975127, rent_due: 809444, rent_paid: 3642464 ,installment : 0},
+        { name: "中路四號", fee: 2801730, rent_due:713889 , rent_paid: 3372303 ,installment : 0},
+        { name: "蘆竹一號", fee: 625100, rent_due:226000 , rent_paid:827300 ,installment : 0 },
+        { name: "蘆竹二號", fee: 2701383, rent_due:634227 , rent_paid: 3319410,installment : 0 },
+        { name: "八德一號", fee: 2382200, rent_due:922758 , rent_paid: 3174056 ,installment : 0},
+        { name: "八德二號", fee: 1352821, rent_due:591026, rent_paid: 1881199 ,installment : 0},
+        { name: "中壢一號", fee: 2645839, rent_due:1030506, rent_paid:3553645,installment : 0  },
+        { name: "中壢二號", fee: 6560147, rent_due:2236232 , rent_paid: 8420179,installment : 0},
+        { name: "平鎮一號", fee: 440813, rent_due:562240 , rent_paid: 603400,installment : 4600},
+        { name: "楊梅一號", fee: 1256722, rent_due:145000 , rent_paid: 1764326 ,installment : 0},
+        { name: "東門段(都更)", fee: 557718, rent_due:177600 , rent_paid: 717707,installment : 0 },
+        { name: "中興巷(都更)", fee: 727315, rent_due:263040, rent_paid: 990355,installment : 0 }
+        ]
+      };
 
+      let currentMonth = "114-05";
+      let currentData = dataset[currentMonth];
       const infoDiv = document.getElementById("info");
 
-      let xAxis = chart.xAxes.push(
-        am5xy.CategoryAxis.new(root, {
-          categoryField: "name",
-          renderer: am5xy.AxisRendererX.new(root, {
-            minGridDistance: 30
-          }),
-          tooltip: am5.Tooltip.new(root, {})
-        })
-      );
-      xAxis.data.setAll(data);
+      let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "name",
+        renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 30 }),
+        tooltip: am5.Tooltip.new(root, {})
+      }));
 
-      let yAxisLeft = chart.yAxes.push(
-        am5xy.ValueAxis.new(root, {
-          renderer: am5xy.AxisRendererY.new(root, {}),
-          tooltip: am5.Tooltip.new(root, {})
-        })
-      );
+      let yAxisLeft = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, {}),
+        tooltip: am5.Tooltip.new(root, {})
+      }));
 
-      let yAxisRight = chart.yAxes.push(
-        am5xy.ValueAxis.new(root, {
-          renderer: am5xy.AxisRendererY.new(root, { opposite: true }),
-          tooltip: am5.Tooltip.new(root, {})
-        })
-      );
+      let yAxisRight = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, { opposite: true }),
+        tooltip: am5.Tooltip.new(root, {})
+      }));
 
-      let feeSeries = chart.series.push(
-        am5xy.ColumnSeries.new(root, {
-          name: "應收管理費",
-          xAxis: xAxis,
-          yAxis: yAxisLeft,
-          valueYField: "fee",
-          categoryXField: "name",
-          stacked: true,
-          tooltip: am5.Tooltip.new(root, {
-            labelText: "{name} 管理費: {valueY} 元"
-          })
+      let feeSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "應收管理費",
+        xAxis: xAxis,
+        yAxis: yAxisLeft,
+        valueYField: "fee",
+        categoryXField: "name",
+        stacked: true,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{name} 管理費: {valueY} 元"
         })
-      );
+      }));
       feeSeries.columns.template.setAll({ fill: am5.color(0x3366cc), stroke: am5.color(0x3366cc) });
-      feeSeries.data.setAll(data);
 
-      let rentSeries = chart.series.push(
-        am5xy.ColumnSeries.new(root, {
-          name: "應收租金",
-          xAxis: xAxis,
-          yAxis: yAxisLeft,
-          valueYField: "rent_due",
-          categoryXField: "name",
-          stacked: true,
-          tooltip: am5.Tooltip.new(root, {
-            labelText: "{name} 租金: {valueY} 元"
-          })
+      let rentSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: "應收租金",
+        xAxis: xAxis,
+        yAxis: yAxisLeft,
+        valueYField: "rent_due",
+        categoryXField: "name",
+        stacked: true,
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{name} 租金: {valueY} 元"
         })
-      );
+      }));
       rentSeries.columns.template.setAll({ fill: am5.color(0x99cc00), stroke: am5.color(0x99cc00) });
-      rentSeries.data.setAll(data);
 
-      let rentPaidSeries = chart.series.push(
-        am5xy.LineSeries.new(root, {
-          name: "已收租金",
-          xAxis: xAxis,
-          yAxis: yAxisRight,
-          valueYField: "rent_paid",
-          categoryXField: "name",
-          stroke: am5.color(0xFF6600),
-          tooltip: am5.Tooltip.new(root, {
-            labelText: "{name} 已收: {valueY} 元"
-          })
+      let rentPaidSeries = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "已收租金",
+        xAxis: xAxis,
+        yAxis: yAxisRight,
+        valueYField: "rent_paid",
+        categoryXField: "name",
+        stroke: am5.color(0xFF6600),
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{name} 已收: {valueY} 元"
         })
-      );
+      }));
       rentPaidSeries.strokes.template.setAll({ strokeWidth: 2 });
-      rentPaidSeries.data.setAll(data);
 
       rentPaidSeries.bullets.push(function () {
         return am5.Bullet.new(root, {
@@ -160,30 +199,52 @@
         });
       });
 
+      function updateChartData() {
+        xAxis.data.setAll(currentData);
+        feeSeries.data.setAll(currentData);
+        rentSeries.data.setAll(currentData);
+        rentPaidSeries.data.setAll(currentData);
+      }
+
+      function showInfo(item) {
+        const rate = ((item.rent_paid / (item.rent_due+item.fee)) * 100).toFixed(1);
+        const diff = item.rent_due - item.rent_paid;
+        document.getElementById("info").innerHTML = `
+          <div class="header-flex">
+            <h3 id="title">${currentMonth.replace("-", "年")}月${item.name}應收報表</h3>
+            <select id="monthSelect" onchange="changeMonth(this.value)">
+              <option value="114-05" ${currentMonth === "114-05" ? "selected" : ""}>114年5月</option>
+              <option value="114-04" ${currentMonth === "114-04" ? "selected" : ""}>114年4月</option>
+              <option value="114-03" ${currentMonth === "114-03" ? "selected" : ""}>114年3月</option>
+            </select>
+          </div>
+          <div class="info-grid">
+            <div class="info-box">應收總金額：${item.rent_due.toLocaleString()} 元</div>
+            <div class="info-box">已繳租金金額：${item.rent_paid.toLocaleString()} 元</div>
+            <div class="info-box">租金繳交率：${rate}%</div>
+            <div class="info-box">剩餘分期金額：${item.installment} 元</div>
+          </div>
+        `;
+      }
+
       [feeSeries, rentSeries].forEach(series => {
         series.columns.template.events.on("click", function (ev) {
           const category = ev.target.dataItem.dataContext.name;
-          const item = data.find(d => d.name === category);
-          if (item) {
-            const rate = ((item.rent_paid / item.rent_due) * 100).toFixed(1);
-            const diff = item.rent_due - item.rent_paid;
-            infoDiv.innerHTML = `
-              <h3>${item.name} 租金繳交資訊</h3>
-              <div class="info-grid">
-                <div class="info-box">應收總金額：${item.rent_due.toLocaleString()} 元</div>
-                <div class="info-box">已繳租金金額：${item.rent_paid.toLocaleString()} 元</div>
-                <div class="info-box">租金繳交率：${rate}%</div>
-                <div class="info-box">剩餘分期金額：${diff.toLocaleString()} 元</div>
-              </div>
-            `;
-          }
+          const item = currentData.find(d => d.name === category);
+          if (item) showInfo(item);
         });
       });
 
-      chart.set("cursor", am5xy.XYCursor.new(root, {
-        behavior: "zoomX"
-      }));
+      window.changeMonth = function (month) {
+        currentMonth = month;
+        currentData = dataset[month];
+        updateChartData();
+        document.getElementById("title").textContent = `${month.replace("-", "年")}月各社宅應收報表`;
+      };
 
+      chart.set("cursor", am5xy.XYCursor.new(root, { behavior: "zoomX" }));
+
+      updateChartData();
       chart.appear(1000, 100);
       feeSeries.appear();
       rentSeries.appear();

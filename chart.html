@@ -67,13 +67,32 @@
     .chart-box {
       width: 100%;
       height: 350px;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
     }
 
     .details-box {
       font-size: 14px;
-      margin-top: 10px;
+      margin-top: 4px;
     }
+    .repair-chart-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap; /* 小螢幕時可換行 */
+    }
+
+    .chart-box {
+      width: 60%;
+      height: 280px;
+    }
+
+    #repairStatusTable {
+      width: 35%;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
   </style>
 </head>
 <body>
@@ -98,7 +117,11 @@
   <div id="tab2" class="tab-content">
     <h3 id="repairTitle">社宅修繕狀況</h3>
     <div id="repairDetailInfo" class="details-box"></div>
-    <div id="repairCombinedChart" class="chart-box"></div>
+    <!-- 圖表與表格橫向排列 -->
+    <div class="repair-chart-wrapper">
+      <div id="repairCombinedChart" class="chart-box"></div>
+      <div id="repairStatusTable" class="details-box"></div>
+    </div>
   </div>
 
   <!-- 社宅招租情況狀況 -->
@@ -135,84 +158,130 @@
 
     };
 
-    function renderRepairChart(name) {
-      am5.array.each(am5.registry.rootElements, function (root) {
-        if (root.dom.id === "repairCombinedChart") {
-          root.dispose();
-        }
-      });
-
-      let root = am5.Root.new("repairCombinedChart");
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        layout: root.verticalLayout
-      }));
-
-      const data = repairRawData[name];
-      if (!data) return;
-
-      const lineData = Object.keys(data.repairs).map(type => ({
-        category: type,
-        count: data.repairs[type],
-        days: data.avgDays[type]
-      }));
-
-      let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-        categoryField: "category",
-        renderer: am5xy.AxisRendererX.new(root, {})
-      }));
-      xAxis.data.setAll(lineData);
-
-      let yAxisLeft = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererY.new(root, {})
-      }));
-
-      let yAxisRight = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererY.new(root, { opposite: true })
-      }));
-
-      let lineSeries = chart.series.push(am5xy.LineSeries.new(root, {
-  tooltip: am5.Tooltip.new(root, {
-    labelText: "{categoryX} 修繕次數: {valueY} 次"
-  }),
-        name: "修繕次數",
-        xAxis: xAxis,
-        yAxis: yAxisLeft,
-        valueYField: "count",
-        categoryXField: "category",
-        tooltip: am5.Tooltip.new(root, { labelText: "{categoryX}\n次數: {valueY} 次" })
-      }));
-      lineSeries.data.setAll(lineData);
-
-      let barSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
-      tooltip: am5.Tooltip.new(root, {
-        labelText: "{categoryX} 平均耗時: {valueY} 天"
-      }),
-        name: "平均耗時(天)",
-        xAxis: xAxis,
-        yAxis: yAxisRight,
-        valueYField: "days",
-        categoryXField: "category",
-        tooltip: am5.Tooltip.new(root, { labelText: "{categoryX}\n耗時: {valueY} 天" })
-      }));
-      barSeries.data.setAll(lineData);
-
-      const detailBox = document.getElementById("repairDetailInfo");
-
-      [lineSeries, barSeries].forEach(series => {
-        series.columns && series.columns.template.events.on("click", function (ev) {
-          const category = ev.target.dataItem.dataContext.category;
-          const detail = `修繕類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
-          detailBox.textContent = detail;
+      function renderRepairChart(name) {
+        am5.array.each(am5.registry.rootElements, function (root) {
+          if (root.dom.id === "repairCombinedChart") {
+            root.dispose();
+          }
         });
-        series.strokes && series.strokes.template.events.on("click", function (ev) {
-          const category = ev.target.dataItem.dataContext.category;
-          const detail = `修繕類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
-          detailBox.textContent = detail;
+
+        let root = am5.Root.new("repairCombinedChart");
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        let chart = root.container.children.push(am5xy.XYChart.new(root, {
+          layout: root.verticalLayout
+        }));
+
+        const data = repairRawData[name];
+        if (!data) return;
+
+        const lineData = Object.keys(data.repairs).map(type => ({
+          category: type,
+          count: data.repairs[type],
+          days: data.avgDays[type]
+        }));
+
+        let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+          categoryField: "category",
+          renderer: am5xy.AxisRendererX.new(root, {})
+        }));
+        xAxis.data.setAll(lineData);
+
+        xAxis.get("renderer").labels.template.setAll({
+          rotation: -30,
+          fontSize: 13,
+          centerX: am5.p50,
+          centerY: am5.p100,
+          paddingTop: 5
         });
-      });
-    }
+
+        xAxis.get("renderer").minGridDistance = 60;
+
+        let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererY.new(root, {})
+        }));
+
+        // ✅ 長條圖：修繕次數
+        let barSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+          name: "修繕次數",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "count",
+          categoryXField: "category",
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{categoryX}\n修繕次數: {valueY} 次"
+          })
+        }));
+        barSeries.columns.template.setAll({
+          fill: am5.color(0x3366cc),
+          stroke: am5.color(0x3366cc)
+        });
+        barSeries.data.setAll(lineData);
+
+        // ✅ 折線圖：平均耗時
+        let lineSeries = chart.series.push(am5xy.LineSeries.new(root, {
+          name: "平均耗時(天)",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "days",
+          categoryXField: "category",
+          stroke: am5.color(0xff6600),
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{categoryX}\n平均耗時: {valueY} 天"
+          })
+        }));
+        lineSeries.strokes.template.setAll({
+          strokeWidth: 3,
+          stroke: am5.color(0xff6600)
+        });
+        lineSeries.data.setAll(lineData);
+
+        // ✅ 原點：大一點、明顯橘色實心圓
+        lineSeries.bullets.push(function () {
+          return am5.Bullet.new(root, {
+            sprite: am5.Circle.new(root, {
+              radius: 6,
+              fill: am5.color(0xff6600),
+              stroke: am5.color(0xffffff),
+              strokeWidth: 2
+            })
+          });
+        });
+
+        const detailBox = document.getElementById("repairDetailInfo");
+
+        [barSeries, lineSeries].forEach(series => {
+          series.columns && series.columns.template.events.on("click", function (ev) {
+            const category = ev.target.dataItem.dataContext.category;
+            const detail = `修繕類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
+            detailBox.textContent = detail;
+          });
+          series.strokes && series.strokes.template.events.on("click", function (ev) {
+            const category = ev.target.dataItem.dataContext.category;
+            const detail = `修繕類型：${category}｜次數：${data.repairs[category]} 次｜平均耗時：${data.avgDays[category]} 天`;
+            detailBox.textContent = detail;
+          });
+        });
+
+      // ✅ 顯示統計表格
+      const statusTable = document.getElementById("repairStatusTable");
+      statusTable.innerHTML = `
+        <table style="margin: 10px auto; border-collapse: collapse; font-size: 15px;">
+          <tr>
+            <th style="border: 1px solid #ccc; padding: 6px 12px; background: #f2f2f2;">修繕狀態</th>
+            <th style="border: 1px solid #ccc; padding: 6px 12px; background: #f2f2f2;">件數</th>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #ccc; padding: 6px 12px;">處理中</td>
+            <td style="border: 1px solid #ccc; padding: 6px 12px;">3 件</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #ccc; padding: 6px 12px;">已完成</td>
+            <td style="border: 1px solid #ccc; padding: 6px 12px;">6 件</td>
+          </tr>
+        </table>
+      `;
+      }
   </script>
 
   <script>
