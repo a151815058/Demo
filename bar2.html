@@ -166,6 +166,7 @@
               <th rowspan="2">總戶數</th>
               <th colspan="2">招租中</th>
               <th colspan="2">已進駐</th>
+              <th rowspan="2">進駐率</th>
             </tr>
             <tr>
               <th>專案</th>
@@ -183,6 +184,7 @@
               const occupiedProject = occupiedShops.filter(s => s.type === '專案').length;
               const occupiedPublic = occupiedShops.filter(s => s.type === '公開').length;
               const totalUnits = leasingProject + leasingPublic + occupiedProject + occupiedPublic + 2;
+              const occupancyRate = ((occupiedProject + occupiedPublic) / totalUnits * 100).toFixed(1) + '%';
               return `
                 <tr>
                   <td>${name}</td>
@@ -191,6 +193,7 @@
                   <td>${leasingPublic}</td>
                   <td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','專案')">${occupiedProject}</span></td>
                   <td><span style="color:blue;cursor:pointer" onclick="renderBarChartByFilter('${name}','公開')">${occupiedPublic}</span></td>
+                  <td>${occupancyRate}</td>
                 </tr>`;
             }).join('')}
           </tbody>
