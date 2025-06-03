@@ -10,18 +10,6 @@
       font-family: sans-serif;
       margin: 20px;
     }
-    #container {
-      display: flex;
-      gap: 20px;
-    }
-    #tableContainer {
-      width: 50%;
-      overflow-x: auto;
-    }
-    #chartdiv {
-      width: 50%;
-      height: 600px;
-    }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -33,6 +21,9 @@
     }
     th {
       background-color: #f2f2f2;
+    }
+    tr.selected {
+      background-color: #d0ebff !important;
     }
     a {
       cursor: pointer;
@@ -105,12 +96,41 @@
   </table>
 
   <script>
+    window.addEventListener('message', function (e) {
+      if (e.data.type === 'selectHousing') {
+        const name = e.data.name;
+        const rows = document.querySelectorAll('#housingTable tr');
+        rows.forEach(row => {
+          row.classList.remove('selected');
+          if (row.dataset.name === name) {
+            row.classList.add('selected');
+            const link = row.querySelector('a');
+            if (link) link.click();
+          }
+        });
+      }
+    });
+
     function sendData(el) {
       const tr = el.closest("tr");
       const name = tr.dataset.name;
       const values = JSON.parse(tr.dataset.values);
       window.parent.frames['chartFrame'].postMessage({ name, values }, "*");
+          const rows = document.querySelectorAll('#housingTable tr');
+          rows.forEach(row => {
+          row.classList.remove('selected');
+          if (row.dataset.name === name) {
+            row.classList.add('selected');
+            const link = row.querySelector('a');
+            if (link) link.click();
+          }
+        });
+        link.on('click', function (params) {
+          const name = params.name;
+          window.parent.postMessage({ type: 'goToBarNew' }, '*');
+        });
     }
+
   </script>
 </body>
 </html>
