@@ -24,9 +24,14 @@
       font-size: 16px;
       padding: 4px 8px;
     }
+    h3 {
+      margin-top: 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+  <h3>近一年社宅應收趨勢圖</h3>
   <div id="header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
     <button onclick="goBackToBar()" style="font-size: 16px; padding: 6px 12px;">返回全社宅當月應收</button>
     <div id="controls">
@@ -177,7 +182,7 @@
     });
     function goBackToBar() {
     window.parent.postMessage({ type: 'backToBar' }, '*');
-  }
+   }
   </script>
 </body>
 </html>
