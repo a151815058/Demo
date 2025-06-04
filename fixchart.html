@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>社宅修繕狀況分析</title>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { display: flex; gap: 20px; }
+    .left-panel { flex: 1; min-width: 300px; }
+    .right-panel { flex: 2; min-width: 700px; }
+    select { padding: 6px 10px; font-size: 16px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 6px; cursor: pointer; border-bottom: 1px solid #ccc; }
+    li:hover { background-color: #f0f0f0; }
+    .stats { font-size: 14px; color: #555; }
+    #chartdiv { width: 100%; height: 400px; margin-top: 20px; }
+    #repairTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    #repairTable th, #repairTable td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    #repairTable th { background-color: #f8f8f8; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="left-panel">
+    <h3>修繕狀況列表</h3>
+    <label for="monthSelect">累計至年月：</label>
+    <select id="monthSelect">
+      <option value="2025-05">2025年5月</option>
+      <option value="2025-06" selected>2025年6月</option>
+    </select>
+    <ul id="housingList"></ul>
+  </div>
+
+  <div class="right-panel">
+    <h3 id="chartTitle">修繕類型統計</h3>
+    <table id="repairTable">
+      <thead>
+        <tr>
+          <th>修繕類型</th>
+          <th>處理中</th>
+          <th>已完成</th>
+          <th>總件數</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div id="chartdiv"></div>
+  </div>
+</div>
+
+<script>
+  const housingData = {
+    "2025-05": [
+      { name: "中路一號", processing: 4, completed: 6, types: {
+        宅內修繕_其他: { processingCount: 1, completedCount: 2 },
+        宅內修繕_水電類: { processingCount: 1, completedCount: 1 },
+        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 3 }
+      }},
+      { name: "中路二號", processing: 2, completed: 3, types: {
+        宅內修繕_其他: { processingCount: 1, completedCount: 1 },
+        宅內修繕_廚具標配家具: { processingCount: 1, completedCount: 2 }
+      }}
+    ],
+    "2025-06": [
+      { name: "中路一號", processing: 1, completed: 8, types: {
+        宅內修繕_其他: { processingCount: 0, completedCount: 4 },
+        宅內修繕_水電類: { processingCount: 1, completedCount: 2 },
+        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2 }
+      }},
+      { name: "中路二號", processing: 5, completed: 1, types: {
+        宅內修繕_其他: { processingCount: 3, completedCount: 0 },
+        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 1 }
+      }},
+      { name: "中路三號", processing: 0, completed: 5, types: {
+        宅內修繕_其他: { processingCount: 0, completedCount: 1 },
+        宅內修繕_水電類: { processingCount: 0, completedCount: 2 },
+        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2 }
+      }}
+    ]
+  };
+
+  const monthSelect = document.getElementById('monthSelect');
+  const housingList = document.getElementById('housingList');
+  const chartTitle = document.getElementById('chartTitle');
+  const repairTableBody = document.querySelector('#repairTable tbody');
+
+  am5.ready(function () {
+    const root = am5.Root.new("chartdiv");
+    root.setThemes([am5themes_Animated.new(root)]);
+    const chart = root.container.children.push(am5xy.XYChart.new(root, {}));
+    const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: "type",
+      renderer: am5xy.AxisRendererX.new(root, {})
+    }));
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererY.new(root, {})
+    }));
+
+    const processingSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+      name: "處理中",
+      xAxis: xAxis,
+      yAxis: yAxis,
+      valueYField: "processingCount",
+      categoryXField: "type",
+      tooltip: am5.Tooltip.new(root, { labelText: "{name}: {valueY}" })
+    }));
+
+    const completedSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
+      name: "已完成",
+      xAxis: xAxis,
+      yAxis: yAxis,
+      valueYField: "completedCount",
+      categoryXField: "type",
+      tooltip: am5.Tooltip.new(root, { labelText: "{name}: {valueY}" })
+    }));
+
+    chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    chart.legend = am5.Legend.new(root, { centerX: am5.p50, x: am5.p50 });
+
+    function updateList(month) {
+    housingList.innerHTML = '';
+
+    // 先合併所有社宅的 types 統計
+    const mergedItem = {
+        name: "全部社宅",
+        types: {},
+    };
+
+    housingData[month].forEach(item => {
+        for (const [type, stat] of Object.entries(item.types)) {
+        if (!mergedItem.types[type]) {
+            mergedItem.types[type] = { processingCount: 0, completedCount: 0 };
+        }
+        mergedItem.types[type].processingCount += stat.processingCount;
+        mergedItem.types[type].completedCount += stat.completedCount;
+        }
+    });
+
+    const allLi = document.createElement('li');
+    allLi.innerHTML = `<strong>全部社宅</strong><div class="stats">(統計所有社宅修繕)</div>`;
+    allLi.onclick = () => updateChartAndTable(mergedItem);
+    housingList.appendChild(allLi);
+
+    // 加入單一社宅項目
+    housingData[month].forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${item.name}</strong><div class="stats">處理中：${item.processing}，已完成：${item.completed}</div>`;
+        li.onclick = () => updateChartAndTable(item);
+        housingList.appendChild(li);
+    });
+
+    // 預設觸發全部社宅圖表
+    updateChartAndTable(mergedItem);
+    }
+
+    function updateChartAndTable(item) {
+      chartTitle.textContent = `修繕類型統計 - ${item.name}`;
+      const data = Object.entries(item.types).map(([type, stats]) => ({
+        type,
+        processingCount: stats.processingCount,
+        completedCount: stats.completedCount,
+        total: stats.processingCount + stats.completedCount
+      }));
+
+      xAxis.data.setAll(data);
+      processingSeries.data.setAll(data);
+      completedSeries.data.setAll(data);
+
+      // 更新表格
+      repairTableBody.innerHTML = '';
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row.type}</td><td>${row.processingCount}</td><td>${row.completedCount}</td><td>${row.total}</td>`;
+        repairTableBody.appendChild(tr);
+      });
+    }
+
+    // 預設載入
+    updateList(monthSelect.value);
+    monthSelect.addEventListener('change', () => updateList(monthSelect.value));
+  });
+</script>
+
+</body>
+</html>

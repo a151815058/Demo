@@ -122,13 +122,15 @@
           if (row.dataset.name === name) {
             row.classList.add('selected');
             const link = row.querySelector('a');
-            if (link) link.click();
+            if (link){
+              link.on('click', function (params) {
+                const name = params.name;
+                window.parent.postMessage({ type: 'goToBarNew' }, '*');
+              });                
+            }
           }
         });
-        link.on('click', function (params) {
-          const name = params.name;
-          window.parent.postMessage({ type: 'goToBarNew' }, '*');
-        });
+
     }
 
   </script>

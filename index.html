@@ -82,6 +82,18 @@
     .toggle-icon-btn:hover {
       background-color: #1565c0;
     }
+    .section-wrapper {
+      border: 2px solid #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      background-color: #f9f9f9;
+    }
+
+    .section-wrapper h3 {
+      margin-top: 0;
+      text-align: center;
+    }
   </style>
 
 </head>
@@ -415,17 +427,29 @@
                 <!-- 嵌入的行事曆 iframe -->
                 <iframe id="myIframe" src="calandar.html" scrolling="no" width="100%" style="border: none; height: 600px;"></iframe>
               </div>
-
-              <h3 style="text-align:center">社宅出租/管理統計</h2>
+              <div class="section-wrapper">
+                <h3>社宅出租/管理統計</h3>
                 <div id="layout">
-                  <iframe src="bar3.html" id="myIframe"  scrolling="no"  width="100%"></iframe>
+                  <iframe src="bar3.html" id="myIframe" scrolling="no" width="100%"></iframe>
+
                   <div id="container">
                     <iframe src="table.html" id="tableFrame" name="tableFrame"></iframe>
-                    <iframe src="chart.html" scrolling="no"  id="chartFrame" name="chartFrame"></iframe>
+                    <iframe src="chart.html" scrolling="no" id="chartFrame" name="chartFrame"></iframe>
                   </div>
-                  <iframe src="bar.html" id="barFrame" name="barFrame" width="100%" height="900px" style="border:none;"></iframe>           </div>
-              <div>
-                <iframe src="bar2.html" scrolling="no"  width="100%" height="500px" style="border:none;"></iframe>
+
+                  <iframe src="bar.html" id="barFrame" name="barFrame" width="100%" height="900px" style="border:none;"></iframe>
+                </div>
+              </div>
+              <div class="section-wrapper">
+                <h3 style="text-align:center">社宅修繕統計</h2>
+                <div>
+                  <iframe src="fixchart.html" scrolling="no"  width="100%" height="500px" style="border:none;"></iframe>
+                </div>
+              </div>
+              <div class="section-wrapper">
+                <div>
+                  <iframe src="bar2.html" scrolling="no"  width="100%" height="500px" style="border:none;"></iframe>
+                </div>
               </div>
               <div class="content">
                 <iframe src="chart4.html" scrolling="no"  width="33%" height="100px" style="border:none;"></iframe>
@@ -498,7 +522,7 @@
         barFrame.contentWindow.postMessage(data, '*');
       }
     }
-  });
+   });
   const barFrame = document.getElementById('barFrame');
 
   // 切換為 bar_new.html 的邏輯
