@@ -116,7 +116,7 @@
       const name = tr.dataset.name;
       const values = JSON.parse(tr.dataset.values);
       window.parent.frames['chartFrame'].postMessage({ name, values }, "*");
-      window.parent.frames['barFrame0'].postMessage({ name }, "*");
+      window.parent.frames['barFrame'].postMessage({ name }, "*");
           const rows = document.querySelectorAll('#housingTable tr');
           rows.forEach(row => {
           row.classList.remove('selected');

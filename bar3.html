@@ -13,6 +13,7 @@
   </style>
 </head>
 <body>
+<div style="text-align: right; font-size: 14px; margin-top: 10px; margin-right: 10px;" id="dataTime"></div>
 
 <div id="controls">
   <label><input type="checkbox" class="roomFilter" value="一房型" checked> 一房型</label>
@@ -181,7 +182,14 @@
     window.parent.postMessage({ type: 'selectHousing', name }, '*');
    // window.parent.postMessage({ type: 'goToBarNew' }, '*');
   });
-
+function updateTimestamp() {
+  const now = new Date();
+  const formatted = `資料統計時間：${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getDate().toString().padStart(2, '0')} ` +
+                    `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  document.getElementById('dataTime').textContent = formatted;
+}
+updateTimestamp();
+setInterval(updateTimestamp, 1000); // 每秒更新一次時間
 </script>
 
 </body>
