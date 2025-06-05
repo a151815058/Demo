@@ -537,7 +537,7 @@
   window.addEventListener('message', function (e) {
     const data = e.data;
     if (data && data.type === 'goToBarNew') {
-      barFrame.src = 'bar_new.html';
+      barFrame.src = 'dual_year_compare_with_percentage.html';
     }
   });
 
@@ -546,6 +546,9 @@
     const data = e.data;
     if (data && data.type === 'backToBar') {
       barFrame.src = 'bar.html';
+      iframe0.onload = function () {
+      iframe0.style.height = iframe0.contentWindow.document.body.scrollHeight + 'px';
+    };
     }
   });
   </script>

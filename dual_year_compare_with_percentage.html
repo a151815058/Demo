@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>租金趨勢圖</title>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    #chartdiv {
+      width: 100%;
+      height: 600px;
+    }
+    #controls {
+      padding: 10px;
+      text-align: right;
+    }
+    select {
+      font-size: 16px;
+      padding: 4px 8px;
+    }
+    h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h3>近一年社宅應收趨勢圖</h3>
+  <div id="header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+    <button onclick="goBackToBar()" style="font-size: 16px; padding: 6px 12px;">返回全社宅當月應收</button>
+    
+<div id="controls" style="text-align: center; padding: 10px;">
+  <label for="year1">基準年度：</label>
+  <select id="year1">
+    <option value="113" selected>113年</option>
+    <option value="114">114年</option>
+  </select>
+  &nbsp;&nbsp;
+  <label for="year2">比較年度：</label>
+  <select id="year2">
+    <option value="113">113年</option>
+    <option value="114" selected>114年</option>
+  </select>
+</div>
+<div id="controls" style="display:none;">
+      <label for="monthSelect">累計至月份：</label>
+      <select id="monthSelect">
+        <option value="114-06" selected>114年6月</option>
+        <option value="114-05">114年5月</option>
+        <option value="114-04">114年4月</option>
+        <option value="114-03">114年3月</option>
+        <option value="114-02">114年2月</option>
+        <option value="114-01">114年1月</option>
+        <option value="113-12">113年12月</option>
+        <option value="113-11">113年11月</option>
+        <option value="113-10">113年10月</option>
+        <option value="113-09">113年9月</option>
+        <option value="113-08">113年8月</option>
+        <option value="113-07">113年7月</option>
+        <option value="113-06">113年6月</option>
+      </select>
+    </div>
+  </div>
+
+  
+<div style="display: flex; flex-direction: column; gap: 40px; padding: 20px;">
+  <div>
+    <h3>近一年社宅應收總金額趨勢圖</h3>
+    <div id="chart_due" style="width: 100%; height: 400px;"></div>
+  </div>
+  <div>
+    <h3>近一年社宅已繳金額趨勢圖</h3>
+    <div id="chart_paid" style="width: 100%; height: 400px;"></div>
+  </div>
+  <div>
+    <h3>近一年社宅分期金額趨勢圖</h3>
+    <div id="chart_installment" style="width: 100%; height: 400px;"></div>
+  </div>
+</div>
+
+<script>
+am5.ready(function () {
+  const charts = [
+    { id: "chart_due", name: "應收總金額", field: "due", color: 0x3366cc },
+    { id: "chart_paid", name: "已繳租金金額", field: "paid", color: 0x33cc99 },
+    { id: "chart_installment", name: "剩餘分期金額", field: "installment", color: 0xff9900 }
+  ];
+
+  const fullDataMap = {
+        "中路一號": [
+          { month: "113-01", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-02", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "113-03", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-04", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "113-05", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-06", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "114-01", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 },
+          { month: "114-02", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 },
+          { month: "114-03", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "114-04", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "114-05", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 },
+          { month: "114-06", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 }
+        ],
+        "中路二號": [
+          { month: "113-01", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-02", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "113-03", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-04", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "113-05", due: 2500000, fee: 1000000, rent: 1500000, paid: 2300000, installment: 20000 },
+          { month: "113-06", due: 2600000, fee: 950000, rent: 1650000, paid: 2400000, installment: 15000 },
+          { month: "114-01", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 },
+          { month: "114-02", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 },
+          { month: "114-03", due: 2800000, fee: 1100000, rent: 1700000, paid: 2600000, installment: 25000 },
+          { month: "114-04", due: 2900000, fee: 1050000, rent: 1850000, paid: 2700000, installment: 18000 },
+          { month: "114-05", due: 3000000, fee: 1080000, rent: 1920000, paid: 2800000, installment: 12000 },
+          { month: "114-06", due: 2700000, fee: 980000, rent: 1720000, paid: 2500000, installment: 10000 }
+        ]
+      };
+
+  let currentHousing = "中路一號";
+
+  function getMonthlyData(data, year) {
+    return data
+      .filter(d => d.month.startsWith(year + "-"))
+      .map(d => {
+        return {
+          ...d,
+          displayMonth: d.month.split("-")[1] + "月"
+        };
+      });
+  }
+
+  function createChart({ id, name, field, color }) {
+    const root = am5.Root.new(id);
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: "none",
+      wheelY: "none"
+    }));
+
+    const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: "displayMonth",
+      renderer: am5xy.AxisRendererX.new(root, {})
+    }));
+
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererY.new(root, {})
+    }));
+
+    const legend = chart.children.push(am5.Legend.new(root, {
+      centerX: am5.p50,
+      x: am5.p50
+    }));
+
+    chart.set("cursor", am5xy.XYCursor.new(root, {}));
+
+    return { root, chart, xAxis, yAxis, legend, seriesList: [] };
+  }
+
+  function addSeriesToChart(chartObj, year, field, color, nameSuffix, tooltip) {
+    const series = chartObj.chart.series.push(am5xy.LineSeries.new(chartObj.root, {
+      name: nameSuffix,
+      xAxis: chartObj.xAxis,
+      yAxis: chartObj.yAxis,
+      valueYField: field,
+      categoryXField: "displayMonth",
+      stroke: am5.color(color),
+      tooltip: am5.Tooltip.new(chartObj.root, {
+        labelText: tooltip
+      })
+    }));
+
+    series.strokes.template.setAll({ strokeWidth: 2 });
+    series.bullets.push(() => {
+      return am5.Bullet.new(chartObj.root, {
+        sprite: am5.Circle.new(chartObj.root, {
+          radius: 4,
+          fill: chartObj.root.interfaceColors.get("background"),
+          stroke: am5.color(color),
+          strokeWidth: 2
+        })
+      });
+    });
+
+    chartObj.seriesList.push(series);
+    return series;
+  }
+
+  const chartInstances = charts.map(config => ({
+    ...config,
+    ...createChart(config)
+  }));
+
+  
+function updateChartData(year1, year2) {
+    function calcPercentage(base, compare, field) {
+      const baseMap = {};
+      base.forEach(item => {
+        baseMap[item.displayMonth] = item[field];
+      });
+      return compare.map(item => {
+        const baseVal = baseMap[item.displayMonth] || 0;
+        const currentVal = item[field];
+        const percent = baseVal === 0 ? 0 : ((currentVal - baseVal) / baseVal * 100).toFixed(2);
+        return {
+          displayMonth: item.displayMonth,
+          percent: parseFloat(percent)
+        };
+      });
+    }
+
+    const rawData = fullDataMap[currentHousing] || [];
+
+    chartInstances.forEach(({ xAxis, yAxis, field, color, name }, i) => {
+      const chartObj = chartInstances[i];
+      xAxis.data.setAll([
+        { displayMonth: "01月" }, { displayMonth: "02月" }, { displayMonth: "03月" },
+        { displayMonth: "04月" }, { displayMonth: "05月" }, { displayMonth: "06月" },
+        { displayMonth: "07月" }, { displayMonth: "08月" }, { displayMonth: "09月" },
+        { displayMonth: "10月" }, { displayMonth: "11月" }, { displayMonth: "12月" }
+      ]);
+
+      chartObj.seriesList.forEach(s => chartObj.chart.series.removeValue(s));
+      chartObj.seriesList = [];
+
+      const data1 = getMonthlyData(rawData, year1);
+      const data2 = getMonthlyData(rawData, year2);
+
+      const s1 = addSeriesToChart(chartObj, year1, field, color, name + " - " + year1 + "年", name + ": {valueY}");
+      const s2 = addSeriesToChart(chartObj, year2, field, am5.Color.brighten(am5.color(color), -0.3), name + " - " + year2 + "年", name + ": {valueY}");
+
+      s1.data.setAll(data1);
+      s2.data.setAll(data2);
+
+      
+      const percentData = calcPercentage(data1, data2, field);
+      const s3 = chartObj.chart.series.push(am5xy.LineSeries.new(chartObj.root, {
+        name: name + " - 差異百分比",
+        xAxis: chartObj.xAxis,
+        yAxis: chartObj.yAxis,
+        valueYField: "percent",
+        categoryXField: "displayMonth",
+        stroke: am5.color(0xcc0000),
+        tooltip: am5.Tooltip.new(chartObj.root, {
+          labelText: name + " - 百分比差異: {valueY}%"
+        })
+      }));
+      s3.strokes.template.setAll({ strokeDasharray: [4, 2], strokeWidth: 2 });
+      s3.bullets.push(() => {
+        return am5.Bullet.new(chartObj.root, {
+          sprite: am5.Circle.new(chartObj.root, {
+            radius: 4,
+            fill: chartObj.root.interfaceColors.get("background"),
+            stroke: am5.color(0xcc0000),
+            strokeWidth: 2
+          })
+        });
+      });
+      s3.data.setAll(percentData);
+      chartObj.seriesList.push(s3);
+      chartObj.legend.data.setAll([s1, s2, s3]);
+
+    });
+  }
+
+  document.getElementById("year1").addEventListener("change", function () {
+    updateChartData(this.value, document.getElementById("year2").value);
+  });
+  document.getElementById("year2").addEventListener("change", function () {
+    updateChartData(document.getElementById("year1").value, this.value);
+  });
+
+  window.addEventListener("message", function (event) {
+    const data = event.data;
+    if (data.type === "selectHousing" && fullDataMap[data.name]) {
+      currentHousing = data.name;
+      updateChartData(document.getElementById("year1").value, document.getElementById("year2").value);
+    }
+  });
+
+  updateChartData("113", "114");
+});
+function goBackToBar() {
+  window.parent.postMessage({ type: 'backToBar' }, '*');
+}
+</script>
+
+</html>
+</body></html>
