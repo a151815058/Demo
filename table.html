@@ -74,11 +74,11 @@
         <tr data-name="八德二號" data-values='[{"category":"一般戶", "value":156},{"category":"警消戶", "value":4},{"category":"政策戶", "value":172},{"category":"專案戶", "value":2}]'>
           <td><a href="#" onclick="sendData(this)">八德二號</a></td><td>335/354</td><td>156</td><td>1</td><td>4</td><td>172</td><td>0</td><td>0</td><td>0</td><td>2</td>
         </tr>
-        <tr data-name="中壢一號" data-values='[{"category":"一般戶", "value":272},{"category":"警消戶", "value":8},{"category":"政策戶", "value":228},{"category":"安置戶", "value":2},{"category":"高齡友善換居", "value":2}]'>
-          <td><a href="#" onclick="sendData(this)">中壢一號</a></td><td>520/524</td><td>272</td><td>8</td><td>8</td><td>228</td><td>2</td><td>0</td><td>2</td><td>0</td>
+        <tr data-name="八德三號" data-values='[{"category":"一般戶", "value":272},{"category":"警消戶", "value":8},{"category":"政策戶", "value":228},{"category":"安置戶", "value":2},{"category":"高齡友善換居", "value":2}]'>
+          <td><a href="#" onclick="sendData(this)">八德三號</a></td><td>520/524</td><td>272</td><td>8</td><td>8</td><td>228</td><td>2</td><td>0</td><td>2</td><td>0</td>
         </tr>
-        <tr data-name="中壢二號" data-values='[{"category":"一般戶", "value":489},{"category":"警消戶", "value":2},{"category":"政策戶", "value":428},{"category":"高齡友善換居", "value":2}]'>
-          <td><a href="#" onclick="sendData(this)">中壢二號</a></td><td>933/957</td><td>489</td><td>12</td><td>2</td><td>428</td><td>0</td><td>0</td><td>2</td><td>0</td>
+        <tr data-name="中壢一號" data-values='[{"category":"一般戶", "value":489},{"category":"警消戶", "value":2},{"category":"政策戶", "value":428},{"category":"高齡友善換居", "value":2}]'>
+          <td><a href="#" onclick="sendData(this)">中壢一號</a></td><td>933/957</td><td>489</td><td>12</td><td>2</td><td>428</td><td>0</td><td>0</td><td>2</td><td>0</td>
         </tr>
         <tr data-name="平鎮一號" data-values='[{"category":"一般戶", "value":31},{"category":"警消戶", "value":1},{"category":"政策戶", "value":28},{"category":"專案戶", "value":2}]'>
           <td><a href="#" onclick="sendData(this)">平鎮一號</a></td><td>64/64</td><td>31</td><td>2</td><td>1</td><td>28</td><td>0</td><td>0</td><td>0</td><td>2</td>
@@ -116,19 +116,15 @@
       const name = tr.dataset.name;
       const values = JSON.parse(tr.dataset.values);
       window.parent.frames['chartFrame'].postMessage({ name, values }, "*");
-      window.parent.frames['barFrame'].postMessage({ name }, "*");
+      setTimeout(() => {
+        window.parent.frames['barFrame'].postMessage({ name }, "*");
+      }, 500); // 等 0.5 秒再發送
           const rows = document.querySelectorAll('#housingTable tr');
           rows.forEach(row => {
           row.classList.remove('selected');
           if (row.dataset.name === name) {
             row.classList.add('selected');
             const link = row.querySelector('a');
-            if (link){
-              link.on('click', function (params) {
-                const name = params.name;
-                window.parent.postMessage({ type: 'goToBarNew' }, '*');
-              });                
-            }
           }
         });
 

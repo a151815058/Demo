@@ -546,9 +546,7 @@
     const data = e.data;
     if (data && data.type === 'backToBar') {
       barFrame.src = 'bar.html';
-      iframe0.onload = function () {
-      iframe0.style.height = iframe0.contentWindow.document.body.scrollHeight + 'px';
-    };
+      window.location.reload();
     }
   });
   </script>

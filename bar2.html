@@ -12,7 +12,7 @@
     th { background-color: #f2f2f2; }
     td a { color: blue; cursor: pointer; text-decoration: underline; }
     .table-wrapper { flex: 1; max-width: 700px; }
-    .chart-wrapper { flex: 1; height: 600px; }
+    .chart-wrapper { flex: 1; height: 0px; }
     .tabs { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 10px; }
     .tab { padding: 10px 20px; cursor: pointer; border: 1px solid #ccc; border-bottom: none; background: #f9f9f9; }
     .tab.active { background: #fff; font-weight: bold; }
@@ -113,13 +113,44 @@
       title: { text: `${housingName} 店鋪應收/未收`, left: 'center' },
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }},
       legend: { data: ['已收', '未收'], top: 30, orient: 'horizontal' },
-      grid: { top: 80, left: '5%', right: '5%', bottom: '3%', containLabel: true },
+      grid: { top: 40, left: '5%', right: '5%', bottom: '3%', containLabel: true },
       xAxis: { type: 'value' },
       yAxis: { type: 'category', data: labels },
       series: [
-        { name: '已收', type: 'bar', stack: 'total', label: { show: false, position: 'inside' }, data: paid },
-        { name: '未收', type: 'bar', stack: 'total', label: { show: false, position: 'inside' }, data: unpaid }
-      ]
+        {
+          name: '已收',
+          type: 'bar',
+          stack: 'total',
+          barWidth: '30%',
+          label: { show: false, position: 'inside' },
+          data: paid,
+          emphasis: {
+            itemStyle: {
+            shadowBlur: 1,            // 陰影模糊度，調小就不會太寬
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0,0,0,0.2)'  // 陰影顏色，可淡一點
+           }
+          }
+        },
+        {
+          name: '未收',
+          type: 'bar',
+          stack: 'total',
+          barWidth: '30%',
+          label: { show: false, position: 'inside' },
+          data: unpaid,
+          emphasis: {
+            itemStyle: {
+            shadowBlur: 1,            // 陰影模糊度，調小就不會太寬
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            shadowColor: 'rgba(0,0,0,0.2)'  // 陰影顏色，可淡一點
+           }
+          }
+        }
+      ],
+      barCategoryGap: '0%'  // 多個 bar 之間的間距（可試試更大）
     });
 
     // 圓餅圖（pie-simple）

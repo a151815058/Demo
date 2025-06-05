@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -69,6 +70,7 @@
   <div id="chartdiv"></div>
 
   <script>
+    console.log("bar.html loaded");
     am5.ready(function () {
       let root = am5.Root.new("chartdiv");
       root.setThemes([am5themes_Animated.new(root)]);
@@ -255,11 +257,6 @@
           <div class="header-flex">
             <h3 id="title">${currentMonth.replace("-", "年")}月${item.name}應收報表</h3>
             <button onclick="goToBarNew()" style="font-size: 16px; padding: 6px 12px;">檢視社宅近一年應收趨勢圖</button>
-            <select id="monthSelect" onchange="changeMonth(this.value)">
-              <option value="114-05" ${currentMonth === "114-05" ? "selected" : ""}>114年5月</option>
-              <option value="114-04" ${currentMonth === "114-04" ? "selected" : ""}>114年4月</option>
-              <option value="114-03" ${currentMonth === "114-03" ? "selected" : ""}>114年3月</option>
-            </select>
           </div>
           <div class="info-grid">
             <div class="info-box">應收總金額：${item.rent_due.toLocaleString()} 元</div>
@@ -298,17 +295,19 @@
       function goToBarNew() {
         window.parent.postMessage({ type: 'goToBarNew' }, '*');
       }
-    window.addEventListener("message", function(event) {
-      const data = event.data;
-      if (data && data.name) {
-        const item = currentData.find(d => d.name === data.name);
-        if (item) {
-          showInfo(item);
-          setActiveBar(feeSeries, data.name);
-          setActiveBar(rentSeries, data.name);
+      // 從 table.html 傳來的 iframe 訊息
+      window.addEventListener("message", function (event) {
+        console.log("收到 postMessage:", event.data);
+        const { name } = event.data;
+        if (name) {
+          const item = currentData.find(d => d.name === name);
+          if (item) {
+            showInfo(item);
+            setActiveBar(feeSeries, item.name);
+            setActiveBar(rentSeries, item.name);
+          }
         }
-      }
-    });
+      });
   </script>
 </body>
 </html>
