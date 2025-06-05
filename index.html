@@ -448,7 +448,7 @@
               </div>
               <div class="section-wrapper">
                 <div>
-                  <iframe src="bar2.html" id="barFrame4" name="barFrame4" scrolling="no"  width="100%" style="border:none;"></iframe>
+                  <iframe src="bar2.html"  id="Frame3" name="Frame3"  scrolling="no"    width="100%" height="700px" style="border:none;"></iframe>
                 </div>
               </div>
               <div class="content">
@@ -492,15 +492,14 @@
     iframe0.onload = function () {
       iframe0.style.height = iframe0.contentWindow.document.body.scrollHeight + 'px';
     };
-      const iframe3 = document.getElementById('barFrame3');
-    iframe3.onload = function () {
+    const iframe3 = document.getElementById('barFrame3');
+      iframe3.onload = function () {
       iframe3.style.height = iframe3.contentWindow.document.body.scrollHeight + 'px';
     };
-      const barFrame4 = document.getElementById('barFrame4');
-    barFrame4.onload = function () {
-      barFrame4.style.height = barFrame4.contentWindow.document.body.scrollHeight + 'px';
+    const Frame3 = document.getElementById('Frame3');
+      Frame3.onload = function () {
+      Frame3.style.height = Frame3.contentWindow.document.body.scrollHeight + 'px';
     };
-
     let isIframeVisible = true;
 
     function toggleIframe() {
