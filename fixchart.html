@@ -28,8 +28,8 @@
   <div class="left-panel">
     <label for="monthSelect">累計至年月：</label>
     <select id="monthSelect">
-      <option value="2025-05">2025年5月</option>
-      <option value="2025-06" selected>2025年6月</option>
+      <option value="2025-05"selected>2025年5月</option>
+      <option value="2025-06" >2025年6月</option>
     </select>
     <ul id="housingList"></ul>
   </div>
@@ -43,6 +43,7 @@
           <th>處理中</th>
           <th>已完成</th>
           <th>總件數</th>
+          <th>平均修繕天數</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -55,56 +56,56 @@
   const housingData = {
     "2025-05": [
       { name: "中路一號", processing: 4, completed: 6, types: {
-        宅內修繕_其他: { processingCount: 1, completedCount: 2 },
-        宅內修繕_水電類: { processingCount: 1, completedCount: 1 },
-        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 3 }
+        宅內修繕_其他: { processingCount: 1, completedCount: 2,averageDays: 3.5 },
+        宅內修繕_水電類: { processingCount: 1, completedCount: 1 ,averageDays: 4.2},
+        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 3 ,averageDays: 6}
       }},
       { name: "中路二號", processing: 7, completed: 21, types: {
-        宅內修繕_其他: { processingCount: 3, completedCount: 10 },
-        宅內修繕_廚具標配家具: { processingCount: 1, completedCount: 5 },
-        宅內修繕_水電類: { processingCount: 3, completedCount: 6}
+        宅內修繕_其他: { processingCount: 3, completedCount: 10,averageDays: 3.3 },
+        宅內修繕_廚具標配家具: { processingCount: 1, completedCount: 5,averageDays: 5 },
+        宅內修繕_水電類: { processingCount: 3, completedCount: 6,averageDays: 4.8}
       }},
       { name: "中路三號", processing: 6, completed: 15, types: {
-        宅內修繕_其他: { processingCount: 1, completedCount: 1 },
-        宅內修繕_廚具標配家具: { processingCount: 1, completedCount: 2 },
-        宅內修繕_水電類: { processingCount: 4, completedCount: 12}
+        宅內修繕_其他: { processingCount: 1, completedCount: 1,averageDays: 1.2},
+        宅內修繕_廚具標配家具: { processingCount: 1, completedCount: 2,averageDays: 2.1 },
+        宅內修繕_水電類: { processingCount: 4, completedCount: 12,averageDays: 5.5}
       }},
       { name: "中路四號", processing: 10, completed: 22, types: {
-        宅內修繕_其他: { processingCount: 3, completedCount: 6 },
-        宅內修繕_廚具標配家具: { processingCount: 5, completedCount: 10 },
-        宅內修繕_水電類: { processingCount: 2, completedCount: 6}
+        宅內修繕_其他: { processingCount: 3, completedCount: 6 ,averageDays: 2.3},
+        宅內修繕_廚具標配家具: { processingCount: 5, completedCount: 10,averageDays: 6.3 },
+        宅內修繕_水電類: { processingCount: 2, completedCount: 6,averageDays: 7.0}
       }},
       { name: "中路五號", processing: 12, completed: 32, types: {
-        宅內修繕_其他: { processingCount: 9, completedCount:21 },
-        宅內修繕_廚具標配家具: { processingCount:2, completedCount: 6 },
-        宅內修繕_水電類: { processingCount: 1, completedCount: 5 }
+        宅內修繕_其他: { processingCount: 9, completedCount:21,averageDays: 3.2 },
+        宅內修繕_廚具標配家具: { processingCount:2, completedCount: 6 ,averageDays: 2.0},
+        宅內修繕_水電類: { processingCount: 1, completedCount: 5,averageDays: 4.6 }
       }}
     ],
     "2025-06": [
       { name: "中路一號", processing: 1, completed: 8, types: {
-        宅內修繕_其他: { processingCount: 0, completedCount: 4 },
-        宅內修繕_水電類: { processingCount: 1, completedCount: 2 },
-        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2 }
+        宅內修繕_其他: { processingCount: 0, completedCount: 4,averageDays: 4.5 },
+        宅內修繕_水電類: { processingCount: 1, completedCount: 2,averageDays:5.5 },
+        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2,averageDays: 2.3 }
       }},
       { name: "中路二號", processing: 5, completed: 1, types: {
-        宅內修繕_其他: { processingCount: 3, completedCount: 0 },
-        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 1 },
-        宅內修繕_水電類: { processingCount: 0, completedCount: 0}
+        宅內修繕_其他: { processingCount: 3, completedCount: 0,averageDays: 3.2 },
+        宅內修繕_廚具標配家具: { processingCount: 2, completedCount: 1,averageDays: 1.2 },
+        宅內修繕_水電類: { processingCount: 0, completedCount: 0,averageDays: 1.2}
       }},
       { name: "中路三號", processing: 0, completed: 5, types: {
-        宅內修繕_其他: { processingCount: 0, completedCount: 1 },
-        宅內修繕_水電類: { processingCount: 0, completedCount: 2 },
-        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2 }
+        宅內修繕_其他: { processingCount: 0, completedCount: 1 ,averageDays: 1.2},
+        宅內修繕_水電類: { processingCount: 0, completedCount: 2,averageDays: 1.2 },
+        宅內修繕_廚具標配家具: { processingCount: 0, completedCount: 2,averageDays: 1.2 }
       }},
       { name: "中路四號", processing: 3, completed: 27, types: {
-        宅內修繕_其他: { processingCount: 1, completedCount: 8 },
-        宅內修繕_廚具標配家具: { processingCount: 10, completedCount: 12 },
-        宅內修繕_水電類: { processingCount: 2, completedCount: 7}
+        宅內修繕_其他: { processingCount: 1, completedCount: 8 ,averageDays: 1.2},
+        宅內修繕_廚具標配家具: { processingCount: 10, completedCount: 12,averageDays: 1.2 },
+        宅內修繕_水電類: { processingCount: 2, completedCount: 7,averageDays: 1.2}
       }},
       { name: "中路五號", processing: 12, completed: 34, types: {
-        宅內修繕_其他: { processingCount: 9, completedCount:21 },
-        宅內修繕_廚具標配家具: { processingCount:2, completedCount: 6 },
-        宅內修繕_水電類: { processingCount: 1, completedCount: 7 }
+        宅內修繕_其他: { processingCount: 9, completedCount:21 ,averageDays: 1.2},
+        宅內修繕_廚具標配家具: { processingCount:2, completedCount: 6 ,averageDays: 1.2},
+        宅內修繕_水電類: { processingCount: 1, completedCount: 7,averageDays: 1.2 }
       }}
     ]
   };
@@ -189,7 +190,8 @@
         type,
         processingCount: stats.processingCount,
         completedCount: stats.completedCount,
-        total: stats.processingCount + stats.completedCount
+        total: stats.processingCount + stats.completedCount,
+        averageDays: stats.averageDays
       }));
 
       xAxis.data.setAll(data);
@@ -200,7 +202,7 @@
       repairTableBody.innerHTML = '';
       data.forEach(row => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${row.type}</td><td>${row.processingCount}</td><td>${row.completedCount}</td><td>${row.total}</td>`;
+        tr.innerHTML = `<td>${row.type}</td><td>${row.processingCount}</td><td>${row.completedCount}</td><td>${row.total}</td><td>${row.averageDays ?? '-'}</td>`;
         repairTableBody.appendChild(tr);
       });
     }

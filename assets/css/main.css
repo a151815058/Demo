@@ -149,14 +149,14 @@ a {
   gap: 16px;
   height: 50px;
   color: #fff;
-  background: #C64300;
+  background: #FFCB50;
   -webkit-box-shadow: var(--shadow, 0 2px 4px rgba(72, 79, 102, 0.15));
           box-shadow: var(--shadow, 0 2px 4px rgba(72, 79, 102, 0.15)); }
   @media (min-width: 992px) {
     .header {
       height: 85px; } }
   .header a {
-    color: currentColor; }
+    color: #000; }
   @media (min-width: 992px) {
     .header .logo h2 {
       width: calc(100vw - 230px - 400px); } }
@@ -190,7 +190,7 @@ a {
   .logo .img-wrap {
     display: none;
     height: 100%;
-    background: #8F3000;
+    background: #FFCB50;
     background-size: 100px;
     border-radius: 0;
     -webkit-flex-shrink: 0;
@@ -282,7 +282,7 @@ a {
   top: 50px;
   z-index: 10;
   width: 100%;
-  background: #5B7C87;
+  background: #F8F4ED;
   color: #fff; }
   @media (min-width: 992px) {
     .aside {
@@ -346,7 +346,7 @@ body:has(.nav-collapse.show) {
       padding: 0;
       border-width: 0; } }
   .top-helper .dropdown-toggle {
-    color: white;
+    color: #000;
     border: none; }
     @media (min-width: 992px) {
       .top-helper .dropdown-toggle {
@@ -405,8 +405,8 @@ body:has(.nav-collapse.show) {
     font-size: var(--badge-text-size);
     font-weight: normal;
     border-radius: 999rem;
-    background-color: #FFCB50;
-    color: #000;
+    background-color: #C64300;
+    color: #FFF;
     -webkit-transform: translate(22%, -34%);
         -ms-transform: translate(22%, -34%);
             transform: translate(22%, -34%); }
@@ -428,7 +428,7 @@ body:has(.nav-collapse.show) {
     padding: 0;
     border-radius: 999rem;
     background-color: white;
-    color: #8f3000;
+    color: #C64300;
     border: none;
     font-size: var(--icon-size); }
   @media (min-width: 992px) {
@@ -474,9 +474,9 @@ body:has(.nav-collapse.show) {
   text-decoration: none;
   -webkit-transition: all .2s;
   transition: all .2s;
-  color: currentColor; }
+  color: #000; }
   .menu a:hover {
-    background-color: var(--menu-link-hover-bg, rgba(255, 255, 255, 0.1)); }
+    background-color:#F8EBD8; }
   .menu a.active {
     color: #531C00 !important;
     background-color: #F39917; }
@@ -1934,7 +1934,7 @@ body.scrollDown .sticky-top-scroll {
   width: var(--btn-icon-size, 40px);
   height: var(--btn-icon-size, 40px);
   padding: 0;
-  color: var(--btn-icon-color, currentColor);
+  color:  #000;
   border: none;
   background: none;
   text-decoration: none;
@@ -2296,4 +2296,3 @@ body.scrollDown .sticky-top-scroll {
   width: 100vw;
   height: 100vh; }
 
-/*# sourceMappingURL=main.css.map */
